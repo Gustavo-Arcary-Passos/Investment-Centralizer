@@ -1,2 +1,4 @@
 /userInfo
 venv/
+
+__pycache__/
