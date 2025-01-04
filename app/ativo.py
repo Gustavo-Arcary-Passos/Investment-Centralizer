@@ -48,10 +48,6 @@ class Ativo:
             quantidadeTotal += data["quantidade"]
             precoAcumulado += data["valor"]
         
-        for data in self.data["venda"]:
-            quantidadeTotal -= data["quantidade"]
-            precoAcumulado -= data["valor"]
-        
         return precoAcumulado/quantidadeTotal
 
     def getLucro(self):
