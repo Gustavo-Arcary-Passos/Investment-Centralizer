@@ -4,7 +4,8 @@ class Ativo:
     def __init__(self, ativo):
         self.nome = ativo["nome"]
         self.custodia = ativo["custodia"]
-        self.codigo = ativo["codigo"]
+        self.categoria = ativo["categoria"]
+        self.codigo = ativo.get("codigo", None)
         self.quantidade = ativo["quantidade"]
         self.data = ativo["data"] # dicionario com dias de compra e venda do ativo, com valor de fechamento do dia
         if self.codigo is not None:
@@ -39,7 +40,20 @@ class Ativo:
         return self.quantidade
     
     def getValor(self):
-        return self.info.getValue()
+        if self.codigo is not None:
+            return self.info.getValue()
+        return None
+    
+    def getPrecoAtual(self):
+        valor = self.getValor()
+        if valor is None:
+            precoAcumulado = self.quantidade
+        else:
+            precoAcumulado = valor * self.quantidade
+        return precoAcumulado
+    
+    def getCategoria(self):
+        return self.categoria
     
     def getPrecoMedio(self):
         quantidadeTotal = 0
@@ -54,6 +68,18 @@ class Ativo:
         precoMedio = self.getPrecoMedio()
         return (self.info.getValue() - precoMedio)*self.quantidade
     
+    def getAtivo(self):
+        ativo = {
+            "nome": self.nome,
+            "custodia": self.custodia,
+            "categoria": self.categoria,
+            "codigo": self.codigo,
+            "quantidade": self.quantidade,
+            "data": self.data,
+        }
+
+        return ativo
+    
     def setNome(self, nome):
         self.nome = nome
 
@@ -65,6 +91,9 @@ class Ativo:
     
     def setQuantidade(self, quantidade):
         self.quantidade = quantidade
+
+    def setCategoria(self, categoria):
+        self.categoria = categoria
 
 # aaplInfo = {
 #     "nome" : "Apple",

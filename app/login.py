@@ -1,35 +1,21 @@
-import json
 import os
+from reader import Reader
+from investments import Investment
 
-class Login:
+class Login(Reader):
     base = os.path.join(os.getcwd(), "db","login.json")
-    
-    @staticmethod
-    def _readDb():
-        if not os.path.exists(Login.base) or os.path.getsize(Login.base) == 0:
-            return {}
-        
-        with open(Login.base, "r") as arquivo:
-            dados = json.load(arquivo)
-        return dados
-
-    @staticmethod
-    def _writeDb(dados):
-        with open(Login.base, "w") as arquivo:
-            json.dump(dados, arquivo)
-        return True
 
     @staticmethod
     def createLogin(user, password):
-        dados = Login._readDb()
+        dados = Login._readDb(Login.base)
         if dados.get(user, None) is not None:
             return False
         dados[user] = password
-        return Login._writeDb(dados)
+        return Login._writeDb(Login.base, dados)
 
     @staticmethod
     def getUserDb(user):
-        dados = Login._readDb()
+        dados = Login._readDb(Login.base)
         return dados.get(user, None)
 
     @staticmethod
@@ -54,9 +40,15 @@ class Login:
     
     @staticmethod
     def deleteLogin(user, password):
-        dados = Login._readDb()
+        dados = Login._readDb(Login.base)
         if Login.checkLogin(user, password):
             del dados[user]
-            Login._writeDb(dados)
+            Login._writeDb(Login.base, dados)
             return True
         return False
+    
+    @staticmethod
+    def getAllUsers():
+        return Login._readDb(Login.base)
+    
+print(Login.getAllUsers())

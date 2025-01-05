@@ -24,8 +24,3 @@ class Info:
     
     def getCurrency(self):
         return self.ticker.info['currency']
-    
-# aapl = Info("AAPL")
-# data = "2022-12-12"
-# print(aapl.getValue(data))
-# print(aapl.getCurrency())
