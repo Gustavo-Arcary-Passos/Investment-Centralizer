@@ -1,5 +1,6 @@
 import os
 from reader import Reader
+from portfolio import Portfolio
 
 class Investment(Reader):
     base = os.path.join(os.getcwd(), "db","investment.json")
@@ -9,7 +10,10 @@ class Investment(Reader):
         dados = Investment._readDb(Investment.base)
         if dados.get(user, None) is not None:
             return False
-        dados[user] = {}
+        dados[user] = {
+            "ativos": [],
+            "estrategia": {}
+        }
         Investment._writeDb(Investment.base, dados)
 
     @staticmethod
@@ -26,4 +30,11 @@ class Investment(Reader):
         dados = Investment._readDb(Investment.base)
         if dados.get(user, None) is not None:
             del dados[user]
+        Investment._writeDb(Investment.base, dados)
+
+    @staticmethod
+    def updateUserInvestment(user,userPortfolio):
+        dados = Investment._readDb(Investment.base)
+        dados[user] = userPortfolio.getPortfolio()
+        print(dados[user])
         Investment._writeDb(Investment.base, dados)

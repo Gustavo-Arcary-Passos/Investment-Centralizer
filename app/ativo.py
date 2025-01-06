@@ -1,31 +1,52 @@
 from yahoo_api import Info
+from data import Data
 
 class Ativo:
-    def __init__(self, ativo):
-        self.nome = ativo["nome"]
-        self.custodia = ativo["custodia"]
-        self.categoria = ativo["categoria"]
-        self.codigo = ativo.get("codigo", None)
-        self.quantidade = ativo["quantidade"]
-        self.data = ativo["data"] # dicionario com dias de compra e venda do ativo, com valor de fechamento do dia
+    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None):
+        if isinstance(ativo, dict):
+            self.nome = ativo["nome"]
+            self.custodia = ativo["custodia"]
+            self.categoria = ativo["categoria"]
+            self.codigo = ativo.get("codigo", None)
+            self.quantidade = ativo["quantidade"]
+            if isinstance(ativo["data"], str):
+                self.data = Data(compra = { 
+                    ativo["data"] : {
+                        "quantidade": ativo["quantidade"],
+                        "valor": ativo["valor"]
+                        }
+                    })
+            elif isinstance(ativo["data"], dict):
+                self.data = Data(compra = ativo["data"]["compra"], venda = ativo["data"]["venda"]) 
+        elif isinstance(ativo, str):
+            self.nome = ativo
+            self.custodia = custodia
+            self.categoria = categoria
+            self.codigo = codigo
+            self.quantidade = quantidade
+            if isinstance(data, str):
+                self.data = self.data = Data(compra = { 
+                    data : {
+                        "quantidade": quantidade,
+                        "valor": valor
+                        }
+                    })
         if self.codigo is not None:
             self.info = Info(self.codigo)
         
     def compra(self, quantidade, data, valor = None):
         self.quantidade += quantidade
-        self.data["compra"][data]["quantidade"] = quantidade
         if valor is None:
-            self.data["compra"][data]["valor"] = self.info.getValue(data)
+            self.data.add(data, quantidade, self.info.getValue(data))
         else:
-            self.data["compra"][data]["valor"] = valor
+            self.data.add(data, quantidade, valor)
     
     def venda(self, quantidade, data, valor = None):
         self.quantidade -= quantidade
-        self.data["venda"][data]["quantidade"] = quantidade
         if valor is None:
-            self.data["venda"][data]["valor"] = self.info.getValue(data)
+            self.data.add(data, quantidade, self.info.getValue(data), compra = False)
         else:
-            self.data["compra"][data]["valor"] = valor
+            self.data.add(data, quantidade, valor, compra = False)
 
     def getNome(self):
         return self.nome
@@ -38,6 +59,9 @@ class Ativo:
     
     def getQuantidade(self):
         return self.quantidade
+    
+    def getData(self):
+        return self.data
     
     def getValor(self):
         if self.codigo is not None:
@@ -68,14 +92,14 @@ class Ativo:
         precoMedio = self.getPrecoMedio()
         return (self.info.getValue() - precoMedio)*self.quantidade
     
-    def getAtivo(self):
+    def get(self):
         ativo = {
             "nome": self.nome,
             "custodia": self.custodia,
             "categoria": self.categoria,
             "codigo": self.codigo,
             "quantidade": self.quantidade,
-            "data": self.data,
+            "data": self.data.get(),
         }
 
         return ativo

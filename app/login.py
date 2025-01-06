@@ -11,6 +11,7 @@ class Login(Reader):
         if dados.get(user, None) is not None:
             return False
         dados[user] = password
+        Investment.createInvestment(user)
         return Login._writeDb(Login.base, dados)
 
     @staticmethod
@@ -39,6 +40,12 @@ class Login(Reader):
         return False
     
     @staticmethod
+    def logging(user, password):
+        if Login.checkLogin(user, password):
+            return Login.getUserDb(user)
+        return None 
+    
+    @staticmethod
     def deleteLogin(user, password):
         dados = Login._readDb(Login.base)
         if Login.checkLogin(user, password):
@@ -51,4 +58,11 @@ class Login(Reader):
     def getAllUsers():
         return Login._readDb(Login.base)
     
-print(Login.getAllUsers())
+    @staticmethod
+    def updateUserLogin(user,password,newPassword):
+        if not Login.checkPassword(user,password):
+            return False
+        dados = Login._readDb(Login.base)
+        dados[user] = newPassword
+        Login._writeDb(Login.base,dados)
+        return True
