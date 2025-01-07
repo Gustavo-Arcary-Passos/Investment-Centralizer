@@ -85,9 +85,10 @@ class Ativo:
     def getPrecoMedio(self):
         quantidadeTotal = 0
         precoAcumulado = 0
-        for data in self.data["compra"]:
-            quantidadeTotal += data["quantidade"]
-            precoAcumulado += data["valor"]
+        info = self.data.get()
+        for data in info["compra"]:
+            quantidadeTotal += info["compra"][data]["quantidade"]
+            precoAcumulado += info["compra"][data]["valor"]
         
         return precoAcumulado/quantidadeTotal
 

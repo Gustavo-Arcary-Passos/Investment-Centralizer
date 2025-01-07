@@ -15,10 +15,9 @@ class TestLogin:
 
     @staticmethod
     def teardown():
-        pass
         # Remove o arquivo de teste após os testes
-        # if os.path.exists(TestLogin.path):
-        #     os.remove(TestLogin.path)
+        if os.path.exists(TestLogin.path):
+            os.remove(TestLogin.path)
 
     @staticmethod
     def testUserCreation():
