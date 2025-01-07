@@ -69,7 +69,7 @@ class Portfolio:
                 updateAtivo.compra(ativoData["compra"][data]["quantidade"],data,ativoData["compra"][data]["valor"])
             for data in ativoData["venda"]:
                 updateAtivo.venda(ativoData["venda"][data]["quantidade"],data,ativoData["venda"][data]["valor"])
-            self.setAtivo(ativo.getNome(),ativo.getCustodia(),updateAtivo)
+            self.setAtivo(ativo.getNome(),ativo.getCustodia(),updateAtivo.get())
             
             return 
         self.ativos.append(ativo.get())
