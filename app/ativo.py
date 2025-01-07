@@ -1,5 +1,8 @@
-from yahoo_api import Info
-from data import Data
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.yahoo_api import Info
+from app.data import Data
 
 class Ativo:
     def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None):

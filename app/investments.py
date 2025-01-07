@@ -1,6 +1,8 @@
 import os
-from reader import Reader
-from portfolio import Portfolio
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from app.reader import Reader
+from app.portfolio import Portfolio
 
 class Investment(Reader):
     base = os.path.join(os.getcwd(), "db","investment.json")
