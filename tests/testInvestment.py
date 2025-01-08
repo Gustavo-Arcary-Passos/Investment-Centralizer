@@ -17,10 +17,9 @@ class TestInvestment:
 
     @staticmethod
     def teardown():
-        pass
         # Remove o arquivo de teste após os testes
-        # if os.path.exists(TestInvestment.path):
-        #     os.remove(TestInvestment.path)
+        if os.path.exists(TestInvestment.path):
+            os.remove(TestInvestment.path)
 
     @staticmethod
     def testInvestmentCreation():

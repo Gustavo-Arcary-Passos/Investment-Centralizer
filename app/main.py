@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from views import MainWindow, LoginWindow  # Importar as janelas do arquivo views.py
+from portfolioViews import PortFolioWindow  # Importar as janelas do arquivo views.py
 
 
 def main():
@@ -8,7 +8,7 @@ def main():
     app = QApplication(sys.argv)
 
     # Criar a janela de login
-    login_window = MainWindow()
+    login_window = PortFolioWindow()
 
     # Exibir a janela de login
     login_window.show()
