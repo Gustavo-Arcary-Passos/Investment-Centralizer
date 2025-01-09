@@ -1,19 +1,12 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QLabel, QListWidget
-from graphics import MatplotlibCanvas  # Importe a classe MatplotlibCanvas
+from PyQt5.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QPushButton, QLabel, QListWidget, QSizePolicy
+from graphics import MatplotlibCanvas
 
-class PortFolioWindow(QMainWindow):
+class PortFolioWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Configurar título da janela
-        self.setWindowTitle("Consolidador de Investimentos")
-
-        # Criar widget central
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-
-        # Layout principal (horizontal)
+        # Layout principal
         main_layout = QHBoxLayout()
 
         # Espaço do Canvas à esquerda
@@ -38,13 +31,8 @@ class PortFolioWindow(QMainWindow):
         controls_layout.addWidget(apply_button)
 
         # Adicionar os layouts ao layout principal
-        main_layout.addLayout(controls_layout, stretch=1)  # Menor espaço para controles
-        main_layout.addLayout(canvas_layout, stretch=3)  # Maior espaço para o Canvas
-        
+        main_layout.addLayout(controls_layout, stretch=1)
+        main_layout.addLayout(canvas_layout, stretch=3)
 
-        # Configurar o layout no widget central
-        central_widget.setLayout(main_layout)
-
-        # Configurações da janela
-        self.setWindowFlags(Qt.Window)  # Habilita botões de fechar, minimizar e maximizar
-        self.showMaximized()  # Mostra a janela maximizada com os botões
+        # Configurar o layout no widget
+        self.setLayout(main_layout)

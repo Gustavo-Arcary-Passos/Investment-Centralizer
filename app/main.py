@@ -1,21 +1,19 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from portfolioViews import PortFolioWindow  # Importar as janelas do arquivo views.py
-
+from views import  WindowManager
 
 def main():
     # Criar a instância do QApplication
     app = QApplication(sys.argv)
 
-    # Criar a janela de login
-    login_window = PortFolioWindow()
+    # Criar a janela inicial
+    start_window = WindowManager()
 
-    # Exibir a janela de login
-    login_window.show()
+    # Exibir a janela inicial
+    start_window.show()
 
     # Iniciar o loop de eventos do PyQt
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
