@@ -23,6 +23,7 @@ class Login(Reader):
 
     @staticmethod
     def getUserDb(user, filePath = None):
+        filePath = filePath or Login.getFilePath()
         dados = Login._readDb(filePath)
         return dados.get(user, None)
 

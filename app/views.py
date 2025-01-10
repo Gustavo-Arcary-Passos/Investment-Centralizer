@@ -22,6 +22,11 @@ class WindowManager(QMainWindow):
             QPushButton:hover {
                 background-color: #2980b9;
             }
+            QLineEdit {
+                border-radius: 3px;
+                padding: 10px;
+                font-size: 16px;
+            }
         """)
 
         # Criar e adicionar as janelas ao QStackedWidget
