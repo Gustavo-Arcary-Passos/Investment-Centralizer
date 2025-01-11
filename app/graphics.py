@@ -24,7 +24,7 @@ class MatplotlibCanvas(FigureCanvas):
         self.ax.set_title(title)
         self.draw()
 
-    def plot_concentric_donuts(self, data, labels, inner_labels = [], title="Gráfico de Anéis Concêntricos", colors=None, inner_colors=None, radiusIn = 2,
+    def plot_concentric_donuts(self, data, labels, inner_labels = [], title=None, colors=None, inner_colors=None, radiusIn = 2,
             radiusOut = 4, sizeIn = 1, sizeOut = 1):
         """
         Gera um gráfico de anéis concêntricos no canvas.
@@ -65,6 +65,6 @@ class MatplotlibCanvas(FigureCanvas):
             colors=colors,
             wedgeprops=dict(width=sizeOut, edgecolor='w')
         )
-
-        self.ax.set_title(title)
+        if title is not None:   
+            self.ax.set_title(title)
         self.draw()

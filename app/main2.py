@@ -8,13 +8,13 @@ from app.ativo import Ativo
 from app.data import Data
 
 Login.createLogin("Gustavo","manezinhoLindinhu")
-user = "Gustavo"
-password = "manezinhoLindinhu"
-newPassword = "coxinha123"
-Login.updateUserLogin(user,password,newPassword)
-login2 = Login.logging(user, newPassword)
+user = "GAP"
+password = "RiodeJaneiro"
+#newPassword = "coxinha123"
+#Login.updateUserLogin(user,password,newPassword)
+login2 = Login.logging(user, password)
 userPortfolio = Portfolio(Investment.getUserInvestment(user))
-aaplInfo = Ativo(ativo = "BTC",custodia = "Rico", codigo = "AAPL", quantidade = 5.5, data = "2025-01-03", valor = 89)
+aaplInfo = Ativo(ativo = "BTC",custodia = "Binance", codigo = "BTC-USD", quantidade = 5.5, data = "2025-01-03", valor = 89)
 print(userPortfolio.getPortfolio())
 userPortfolio.addAtivoPortfolio(aaplInfo)
 print(userPortfolio.getPortfolio())

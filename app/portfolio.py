@@ -46,17 +46,29 @@ class Portfolio:
     
     # Fazer de um jeito mais inteligente no qual tem uma funcao que faz o switch para cada um dos textos e se 
     # tiver mais de um incrementa o filtro
-    def getAllAtivoBy(self,text,type="name"):
+    def getAllAtivoBy(self,text=None,type="name"):
         listAtivos = []
         for ativo in self.ativos:
             ativoProcurado = Ativo(ativo)
-            if ativoProcurado.getNome() == text and type == "name":
+            if text is None:
+                listAtivos.append(ativoProcurado)
+            elif ativoProcurado.getNome() == text and type == "name":
                 listAtivos.append(ativoProcurado)
             elif ativoProcurado.getCustodia() == text and type == "custody":
                 listAtivos.append(ativoProcurado)
             elif ativoProcurado.getCategoria() == text and type == "categoria":
                 listAtivos.append(ativoProcurado)
         return listAtivos
+    
+    def getAtivosValueLabel(self,text=None,type="name"):
+        listAtivo = self.getAllAtivoBy(text,type)
+        listLabels = []
+        listAcumulateValue = []
+        for ativo in listAtivo:
+            listLabels.append(ativo.getNome())
+            listAcumulateValue.append(ativo.getPrecoAtual())
+
+        return listLabels,listAcumulateValue
     
     def setAtivo(self,name,custody,ativo):
         for pos in range(0,len(self.ativos)):
