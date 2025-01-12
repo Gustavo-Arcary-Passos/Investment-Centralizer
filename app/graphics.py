@@ -1,6 +1,9 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
+def format_label(label, pct):
+    return f"{label}\n{pct:.1f}%"
+
 class MatplotlibCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -50,20 +53,23 @@ class MatplotlibCanvas(FigureCanvas):
             self.ax.pie(
                 data[1],
                 radius=radiusIn,
-                labels=inner_labels,
-                autopct='%1.1f%%',
+                labels=[format_label(label, pct) for label, pct in zip(inner_labels, [p / sum(data[1]) * 100 for p in data[1]])],
+                autopct=None,
                 colors=inner_colors,
-                wedgeprops=dict(width=sizeIn, edgecolor='w')
+                wedgeprops=dict(width=sizeIn, edgecolor='w'),
+                textprops={'fontweight': 'bold'}
             )
         
         # Gráfico externo
         self.ax.pie(
             data[0],
             radius=radiusOut,
-            labels=labels,
-            autopct='%1.1f%%',
+            labels=[format_label(label, pct) for label, pct in zip(labels, [p / sum(data[0]) * 100 for p in data[0]])],
+            autopct=None,
             colors=colors,
-            wedgeprops=dict(width=sizeOut, edgecolor='w')
+            wedgeprops=dict(width=sizeOut, edgecolor='w'),
+            textprops={'fontweight': 'bold'},
+            labeldistance=0.75
         )
         if title is not None:   
             self.ax.set_title(title)

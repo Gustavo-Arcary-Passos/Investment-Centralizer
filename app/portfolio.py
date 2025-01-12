@@ -34,10 +34,6 @@ class Portfolio:
         return patrimonioAcumulado
     
     def getPortfolio(self):
-        # listAtivos = []
-        # for ativo in self.ativos:
-        #     print(ativo)
-        #     listAtivos.append(ativo.get())
         portifolio = {
             "ativos": self.ativos,
             "estrategia": self.estrategia,
@@ -60,15 +56,21 @@ class Portfolio:
                 listAtivos.append(ativoProcurado)
         return listAtivos
     
-    def getAtivosValueLabel(self,text=None,type="name"):
-        listAtivo = self.getAllAtivoBy(text,type)
-        listLabels = []
-        listAcumulateValue = []
+    def getAtivosValueBy(self,text=None,type="name"):
+        listAtivo = self.getAllAtivoBy(text)
+        dicby = {}
         for ativo in listAtivo:
-            listLabels.append(ativo.getNome())
-            listAcumulateValue.append(ativo.getPrecoAtual())
-
-        return listLabels,listAcumulateValue
+            precoAtual = ativo.getPrecoAtual()
+            if type == "name":
+                nome = ativo.getNome()
+                dicby[nome] = dicby.get(nome,0) + precoAtual
+            elif type == "categoria":
+                categoria = ativo.getCategoria()
+                dicby[categoria] = dicby.get(categoria,0) + precoAtual
+            elif type == "custodia":
+                custodia = ativo.getCustodia()
+                dicby[custodia] = dicby.get(custodia,0) + precoAtual
+        return dicby
     
     def setAtivo(self,name,custody,ativo):
         for pos in range(0,len(self.ativos)):

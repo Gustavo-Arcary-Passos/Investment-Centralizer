@@ -55,6 +55,8 @@ class Ativo:
         return self.nome
 
     def getCustodia(self):
+        if self.custodia is None:
+            return "Nao identificada"
         return self.custodia
     
     def getCodigo(self):
@@ -80,6 +82,8 @@ class Ativo:
         return precoAcumulado
     
     def getCategoria(self):
+        if self.categoria is None:
+            return "Nao identificada"
         return self.categoria
     
     def getPrecoMedio(self):
@@ -122,13 +126,3 @@ class Ativo:
 
     def setCategoria(self, categoria):
         self.categoria = categoria
-
-# aaplInfo = {
-#     "nome" : "Apple",
-#     "custodia": "Rico",
-#     "codigo": "AAPL",
-#     "quantidade": 3.5,
-#     "data": "2023-12-15"
-# }
-# aapl = Ativo(aaplInfo)
-# print(aapl.getLucro())
