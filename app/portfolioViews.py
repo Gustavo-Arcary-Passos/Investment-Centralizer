@@ -1,16 +1,61 @@
 import os
 import sys
 import unidecode
+import locale
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
-    QButtonGroup, QCheckBox, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout
+    QButtonGroup, QCheckBox, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QSpacerItem
 )
-from PyQt5.QtGui import QPainter, QFont
+from PyQt5.QtGui import QColor, QPainter, QPixmap, QFont
 from app.graphics import MatplotlibCanvas
 from app.portfolio import Portfolio
 from app.investments import Investment
 
+def generateListDataInGrid(grid,pos,labels, colors, percentage):
+    grid.setHorizontalSpacing(5)  # Adiciona um pequeno espaço entre as linhas
+
+    for label, color, pct in zip(labels, colors, percentage):
+        # Converte a cor de float (0.0 a 1.0) para inteiro (0 a 255)
+        r, g, b, a = (int(c * 255) for c in color[:4])
+
+        # Cria um quadrado com a cor
+        color_square = QWidget()
+        color_square.setStyleSheet(
+            f"""
+            background-color: {QColor(r, g, b, a).name()};
+            border: 1px solid black;
+            padding: 3px;  /* Adiciona um padding para diminuir o quadrado interno */
+            """
+        )
+        color_square.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        # Define o tamanho máximo e mínimo para o quadrado
+        color_square.setMaximumSize(8, 8)  # Reduz o tamanho total do quadrado
+        color_square.setMinimumSize(8, 8)
+
+        # Cria o rótulo
+        label_widget = QLabel(label)
+        label_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        label_percentage = QLabel(f"{pct:.2f}%")
+        label_percentage.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+
+        # Adiciona um espaçador para ocupar o espaço restante
+        spacer = QSpacerItem(20, 15, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        # Adiciona os widgets à grade
+        grid.addWidget(color_square, pos, 1)  # Coluna 1: Quadrado
+        grid.addWidget(label_widget, pos, 2)  # Coluna 2: Rótulo
+        grid.addWidget(label_percentage, pos, 3)  # Coluna 3: Percentual
+        grid.addItem(spacer, pos, 4)  # Coluna 4: Espaçador
+
+        pos += 1
+
+    return pos
+
+def getValorMilharVirgula(value):
+    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+    return locale.format_string('%.2f', value, grouping=True)
 
 def createQToolButton(name=None, sizePolicy=QSizePolicy.Expanding):
     toolButton = QToolButton()
@@ -145,10 +190,10 @@ class PortFolioWindow(QWidget):
             self.getUserPortfolio("GAP")
         dicInfo = self.userPortfolio.getAtivosValueBy(type = type)
         data = list(dicInfo.values())
-        labels = list(dicInfo.keys())
-        canvas.plot_concentric_donuts(
+        self.labels = list(dicInfo.keys())
+        self.colors,_,self.percentage,_ = canvas.plot_concentric_donuts(
             data=[data],
-            labels=labels,
+            labels=self.labels,
             radiusOut=1.5,
             sizeOut=0.5
         )
@@ -159,7 +204,7 @@ class PortFolioWindow(QWidget):
         graphics_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         rect = graphics_view.viewport().rect()
         centralizedText(scene,graphics_view,"Carteira:",rect.width()/8,rect.height()/16)
-        patrimonio = "R$ " + f"{sum(data):.2f}"
+        patrimonio = "R$ " + getValorMilharVirgula(sum(data))
         centralizedText(scene,graphics_view,patrimonio,rect.width()/8,rect.height()*2/12)
 
         canvas_layout.addWidget(graphics_view)
@@ -168,6 +213,8 @@ class PortFolioWindow(QWidget):
     def OverviewInfoConfig(self, text = "categoria"):
         info_layout = QVBoxLayout()
         data_layout = QGridLayout()
+
+        listadata = self.userPortfolio.getAtivosValueBy(type = text)
         # categoria = self.userPortfolio.getAtivosValueBy(type = "categoria")
         # custodia = self.userPortfolio.getAtivosValueBy(type = "custodia")
         # ativos = self.userPortfolio.getAtivosValueBy(type = "name")
@@ -198,9 +245,21 @@ class PortFolioWindow(QWidget):
         info_layout.setSpacing(0)
         info_layout.setContentsMargins(0, 0, 0, 0)
 
-        data_layout.addWidget(self.categoria_checkbox, 0, 0)
-        data_layout.addWidget(self.custodia_checkbox, 1, 0)
-        data_layout.addWidget(self.ativos_checkbox, 2, 0)
+        pos = 0
+        data_layout.addWidget(self.categoria_checkbox, pos, 0)
+        pos += 1
+        if text == "categoria":
+            pos = generateListDataInGrid(data_layout, pos, self.labels, self.colors, self.percentage)
+        data_layout.addWidget(self.custodia_checkbox, pos, 0)
+        pos += 1
+        if text == "custodia":
+            pos = generateListDataInGrid(data_layout, pos, self.labels, self.colors, self.percentage)
+        data_layout.addWidget(self.ativos_checkbox, pos, 0)
+        pos += 1
+        if text == "name":
+            pos = generateListDataInGrid(data_layout, pos, self.labels, self.colors, self.percentage)
+
+        
 
         info_layout.addLayout(data_layout)
 

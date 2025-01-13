@@ -36,6 +36,8 @@ class Ativo:
                     })
         if self.codigo is not None:
             self.info = Info(self.codigo)
+            if self.info.getCurrency() == "USD":
+                self.conversao = Info("BRL=X")
         
     def compra(self, quantidade, data, valor = None):
         self.quantidade += quantidade
@@ -70,6 +72,8 @@ class Ativo:
     
     def getValor(self):
         if self.codigo is not None:
+            if self.conversao:
+                return self.info.getValue()*self.conversao.getValue()
             return self.info.getValue()
         return None
     
