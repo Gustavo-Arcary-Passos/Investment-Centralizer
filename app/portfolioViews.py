@@ -96,14 +96,19 @@ class PortFolioWindow(QWidget):
 
         self.load_scene(overview)
 
-    def on_active(self):
+    def on_active(self, add = False, edit = False):
         if not hasattr(self, 'ativosWindow') or self.ativosWindow is None:
             self.ativosWindow = AtivosWindow(self)
         print("Ativos clicked")
         ativo = QWidget() 
         ativo_layout = QHBoxLayout()
 
-        listAtivos_layout = self.ativosWindow.AtivosSetUp()
+        if not add and not edit:
+            listAtivos_layout = self.ativosWindow.AtivosSetUp()
+        elif add:
+            listAtivos_layout = self.ativosWindow.AddAtivo()
+        elif edit:
+            listAtivos_layout = self.ativosWindow.ChangeAtivoData()
 
         spacer_layout = QHBoxLayout()
         spacerWidget = QWidget()
