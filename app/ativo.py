@@ -120,7 +120,7 @@ class Ativo:
         self.nome = nome
 
     def setCustodia(self, custodia):
-        self.nome = custodia
+        self.custodia = custodia
 
     def setCodigo(self, codigo):
         self.codigo = codigo

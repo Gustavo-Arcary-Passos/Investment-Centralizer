@@ -45,3 +45,13 @@ class WindowManager(QMainWindow):
         self.central_widget.setCurrentWidget(self.portfolio_window)
 
         self.showMaximized()
+    
+    def closeEvent(self, event):
+        try:
+            if self.central_widget.currentWidget() == self.portfolio_window:
+                self.portfolio_window.save_data()
+        except Exception as e:
+            print(f"Erro ao salvar informações: {e}")
+        finally:
+            # Aceitar o evento de fechamento
+            event.accept()

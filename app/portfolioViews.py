@@ -65,8 +65,12 @@ class PortFolioWindow(QWidget):
         self.on_overview()
 
         self.setLayout(main_layout)
+
+    def save_data(self):
+        Investment.updateUserInvestment(self.username,self.userPortfolio)
     
     def getUserPortfolio(self, portfolioName):
+        self.username = portfolioName
         self.userPortfolio = Portfolio(Investment.getUserInvestment(portfolioName))
 
     def clear_dynamic_content(self):
@@ -96,19 +100,18 @@ class PortFolioWindow(QWidget):
 
         self.load_scene(overview)
 
-    def on_active(self, add = False, edit = False):
+    def on_active(self, add = False, edit = False, ativoData = None):
         if not hasattr(self, 'ativosWindow') or self.ativosWindow is None:
             self.ativosWindow = AtivosWindow(self)
-        print("Ativos clicked")
         ativo = QWidget() 
         ativo_layout = QHBoxLayout()
-
+        print("Äqui")
         if not add and not edit:
             listAtivos_layout = self.ativosWindow.AtivosSetUp()
         elif add:
             listAtivos_layout = self.ativosWindow.AddAtivo()
         elif edit:
-            listAtivos_layout = self.ativosWindow.ChangeAtivoData()
+            listAtivos_layout = self.ativosWindow.go2ChangeAtivoData(ativoData)
 
         spacer_layout = QHBoxLayout()
         spacerWidget = QWidget()
@@ -123,16 +126,13 @@ class PortFolioWindow(QWidget):
         self.load_scene(ativo)
 
     def on_estrategy(self):
-        print("Estrategia clicked")
         content = QLabel("Cena de Estratégia")
         self.load_scene(content)
 
     def on_metas(self):
-        print("Metas clicked")
         content = QLabel("Cena de Metas")
         self.load_scene(content)
 
     def on_destaque(self):
-        print("Destaques clicked")
         content = QLabel("Cena de Destaques")
         self.load_scene(content)
