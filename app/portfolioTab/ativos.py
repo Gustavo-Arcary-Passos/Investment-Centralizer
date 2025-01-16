@@ -3,9 +3,9 @@ import sys
 import unidecode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.ativo import Ativo
-from PyQt5.QtCore import Qt, QDate, QLocale
+from PyQt5.QtCore import Qt, QDate, QLocale, QSize
 from PyQt5.QtWidgets import (
-    QButtonGroup, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem
+    QButtonGroup, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
 )
 from PyQt5.QtGui import QDoubleValidator
 from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
@@ -31,6 +31,33 @@ def addButton():
     button.setStyleSheet(style)
     return button
 
+def create_ListWidget():
+    listWidget = QListWidget()
+    listWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    listWidget.setStyleSheet("""
+        QListWidget {
+            border: none;
+            background-color: transparent;
+        }
+        QListWidget::item {
+            text-align: left;
+            background-color: #3498db;
+            color: black;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        QListWidget::item:hover {
+            background-color: #2980b9;
+        }
+        QListWidget::item:selected {
+            background-color: #0078d7;
+            color: white;
+        }
+    """)
+    listWidget.setSpacing(2)
+    return listWidget
+
 class AtivosWindow(QWidget):
     def __init__(self, portfolio_window):
         super().__init__()
@@ -41,78 +68,57 @@ class AtivosWindow(QWidget):
 
     def create_button_action(self,ativo):
         print(f"clicado {ativo.getNome()}")
-        self.portfolio_window.on_active(edit = True,ativoData=ativo )
+        self.portfolio_window.on_active(edit = True,ativoData=ativo)
 
     def AtivosSetUp(self):
+        item_height = 80
         grid_layout = QGridLayout()
-        
+
+        self.listAtivoCollumnOne = create_ListWidget()
+        self.listAtivoCollumnTwo = create_ListWidget()
+        self.listAtivoCollumnThree = create_ListWidget()
+        self.listAtivoCollumnFour = create_ListWidget()
+        listaAtivoList = []
+        listaAtivoList.append(self.listAtivoCollumnOne)
+        listaAtivoList.append(self.listAtivoCollumnTwo)
+        listaAtivoList.append(self.listAtivoCollumnThree)
+        listaAtivoList.append(self.listAtivoCollumnFour)
+
+        grid_layout.addWidget(self.listAtivoCollumnOne,0,0)
+        grid_layout.addWidget(self.listAtivoCollumnTwo,0,1)
+        grid_layout.addWidget(self.listAtivoCollumnThree,0,2)
+        grid_layout.addWidget(self.listAtivoCollumnFour,0,3)
+
         self.listAllAtivo = self.portfolio_window.userPortfolio.getAllAtivoBy()
         self.listAllAtivo.sort(key=lambda p: (p.getNome(), p.getCustodia()))
-        
-        num_cols = 4 
-        row, col = 0, 0 
 
         patrimonio = sum(ativo.getPrecoAtual() for ativo in self.listAllAtivo)
-        pos = 0
+        count = 0
         for ativo in self.listAllAtivo:
+            list_item = QListWidgetItem()
             value = ativo.getPrecoAtual()
-            button_info =  f"""
+            label_info = f"""
                 <div style="text-align: left; font-size: 12px;">
                     <b>{ativo.getNome()} :</b><br>
                     <div style="text-align: left">
                         <span><b>R$ {getValorMilharVirgula(value)}</b></span>
                     </div>
                     <div style="text-align: right">
-                        <span><b>{100*value/patrimonio:.2f}%</b></span>
+                        <span><b>{100 * value / patrimonio:.2f}%</b></span>
                     </div>
                 </div>
             """
-            style = """
-                QPushButton {
-                    text-align: left;
-                    background-color: #3498db;
-                    color: black;
-                    border-radius: 10px;
-                    padding: 10px;
-                    font-size: 16px;
-                }
-                QPushButton:hover {
-                    background-color: #2980b9;
-                }
-            """
-            #f"{ativo.getNome()}:\nR$ {getValorMilharVirgula(value)}" {value/patrimonio:.2f}%
-            button = create_custom_button(button_info,style=style)
-            #QPushButton()
-            button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-            self.listbutton.append(button)
-            self.listbutton[pos].clicked.connect(lambda checked, ativo=ativo: self.create_button_action(ativo))
-            grid_layout.addWidget(button, row, col)
-            col += 1
-            pos += 1
-            if col >= num_cols:
-                col = 0
-                row += 1
-        addbutton = addButton()
-        addbutton.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        addbutton.clicked.connect(lambda: self.portfolio_window.on_active(add=True))
-        grid_layout.addWidget(addbutton, row, col)
-        col += 1
-        if col >= num_cols:
-            col = 0
-            row += 1
-
-        while col < num_cols:
-            spacer = QWidget()
-            spacer.setSizePolicy(QSizePolicy.Preferred,QSizePolicy.Minimum)
-            grid_layout.addWidget(spacer, row, col)
-            col += 1
+            label = QLabel(label_info)
+            label.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+            list_item.setSizeHint(QSize(label.sizeHint().width(), item_height))
+            listaAtivoList[count].addItem(list_item)
+            listaAtivoList[count].setItemWidget(list_item, label)
+            count += 1
+            if count == 4:
+                count = 0
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(grid_layout)
-
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        main_layout.addWidget(spacer)
 
         return main_layout
     
