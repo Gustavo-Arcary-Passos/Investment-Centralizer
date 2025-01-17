@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.ativo import Ativo
 from PyQt5.QtCore import Qt, QDate, QLocale, QSize
 from PyQt5.QtWidgets import (
-    QButtonGroup, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
+    QButtonGroup, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
 )
 from PyQt5.QtGui import QDoubleValidator
 from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
@@ -58,6 +58,11 @@ def create_ListWidget():
     listWidget.setSpacing(2)
     return listWidget
 
+class NonInteractiveLabel(QLabel):
+    def __init__(self, text):
+        super().__init__(text)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+
 class AtivosWindow(QWidget):
     def __init__(self, portfolio_window):
         super().__init__()
@@ -71,6 +76,7 @@ class AtivosWindow(QWidget):
         self.portfolio_window.on_active(edit = True,ativoData=ativo)
 
     def AtivosSetUp(self):
+        item_widht = 100
         item_height = 80
         grid_layout = QGridLayout()
 
@@ -89,13 +95,16 @@ class AtivosWindow(QWidget):
         grid_layout.addWidget(self.listAtivoCollumnThree,0,2)
         grid_layout.addWidget(self.listAtivoCollumnFour,0,3)
 
-        self.listAllAtivo = self.portfolio_window.userPortfolio.getAllAtivoBy()
-        self.listAllAtivo.sort(key=lambda p: (p.getNome(), p.getCustodia()))
+        listAllAtivo = self.portfolio_window.userPortfolio.getAllAtivoBy()
+        listAllAtivo.sort(key=lambda p: (p.getNome(), p.getCustodia()))
 
-        patrimonio = sum(ativo.getPrecoAtual() for ativo in self.listAllAtivo)
+        patrimonio = sum(ativo.getPrecoAtual() for ativo in listAllAtivo)
         count = 0
-        for ativo in self.listAllAtivo:
+        for ativo in listAllAtivo:
             list_item = QListWidgetItem()
+
+            list_item.setData(Qt.UserRole, ativo)
+
             value = ativo.getPrecoAtual()
             label_info = f"""
                 <div style="text-align: left; font-size: 12px;">
@@ -108,19 +117,41 @@ class AtivosWindow(QWidget):
                     </div>
                 </div>
             """
-            label = QLabel(label_info)
+            label = NonInteractiveLabel(label_info) 
             label.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-            list_item.setSizeHint(QSize(label.sizeHint().width(), item_height))
+            
+            list_item.setSizeHint(QSize(item_widht, item_height))
             listaAtivoList[count].addItem(list_item)
             listaAtivoList[count].setItemWidget(list_item, label)
+
             count += 1
             if count == 4:
                 count = 0
+
+        self.listAtivoCollumnOne.itemClicked.connect(self.on_item_clicked)
+        self.listAtivoCollumnTwo.itemClicked.connect(self.on_item_clicked)
+        self.listAtivoCollumnThree.itemClicked.connect(self.on_item_clicked)
+        self.listAtivoCollumnFour.itemClicked.connect(self.on_item_clicked)
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(grid_layout)
 
         return main_layout
+    
+    def on_item_clicked(self, item):
+        ativo = item.data(Qt.UserRole)
+        if ativo is not None:
+            self.portfolio_window.on_active(
+                edit = True,
+                ativoData = ativo
+            )
+        else:
+            self.portfolio_window.on_active(
+                add = True
+            )
+
+        if ativo:
+            print(f"Ativo selecionado: {ativo.getNome()}")
     
     def AddAtivo2Portfolio(self, nome, codigo, categoria, custodia, data_compra, quantidade_compra, valor_unitario):
         if not nome.strip() or not codigo.strip() or not categoria.strip() or not custodia.strip() or not quantidade_compra.strip() or not valor_unitario.strip():
@@ -273,12 +304,21 @@ class AtivosWindow(QWidget):
         self.data_compra_ativo_text.setDisplayFormat("dd/MM/yyyy")
         self.data_compra_ativo_text.setMinimumDate(QDate(1950, 1, 1))
         self.data_compra_ativo_text.setMaximumDate(QDate(2100, 12, 31))
-        data_compra_checkbox = QCheckBox("É data de venda?")
-        data_compra_checkbox.setChecked(False)
+        data_compra_label = QLabel("É data de venda?")
+        radio_group = QButtonGroup(self)  # Grupo de botões de rádio
+
+        radio_sim = QRadioButton("Sim")
+        radio_nao = QRadioButton("Não")
+        radio_group.addButton(radio_sim)
+        radio_group.addButton(radio_nao)
+        radio_nao.setChecked(True)
+        
         data_layout = QHBoxLayout()
         data_layout.addWidget(data_compra_ativo_label)
         data_layout.addWidget(self.data_compra_ativo_text)
-        data_layout.addWidget(data_compra_checkbox)
+        data_layout.addWidget(data_compra_label)
+        data_layout.addWidget(radio_sim)
+        data_layout.addWidget(radio_nao)
         ChangeAtivo.addLayout(data_layout)
 
         quantidade_compra_ativo_label = QLabel("Quantidade:")
