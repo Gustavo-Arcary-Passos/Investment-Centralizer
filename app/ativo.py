@@ -5,7 +5,7 @@ from app.yahoo_api import Info
 from app.data import Data
 
 class Ativo:
-    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None):
+    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None, sell = False):
         if isinstance(ativo, dict):
             self.nome = ativo["nome"]
             self.custodia = ativo["custodia"]
@@ -13,12 +13,21 @@ class Ativo:
             self.codigo = ativo.get("codigo", None)
             self.quantidade = ativo["quantidade"]
             if isinstance(ativo["data"], str):
-                self.data = Data(compra = { 
-                    ativo["data"] : {
-                        "quantidade": ativo["quantidade"],
-                        "valor": ativo["valor"]
-                        }
-                    })
+                print(sell)
+                if not sell:
+                    self.data = Data(compra = { 
+                        ativo["data"] : {
+                            "quantidade": ativo["quantidade"],
+                            "valor": ativo["valor"]
+                            }
+                        })
+                else:
+                    self.data = Data(venda = { 
+                        ativo["data"] : {
+                            "quantidade": ativo["quantidade"],
+                            "valor": ativo["valor"]
+                            }
+                        })
             elif isinstance(ativo["data"], dict):
                 self.data = Data(compra = ativo["data"]["compra"], venda = ativo["data"]["venda"]) 
         elif isinstance(ativo, str):
@@ -28,12 +37,21 @@ class Ativo:
             self.codigo = codigo
             self.quantidade = quantidade
             if isinstance(data, str):
-                self.data = self.data = Data(compra = { 
-                    data : {
-                        "quantidade": quantidade,
-                        "valor": valor
-                        }
-                    })
+                print(sell)
+                if not sell:
+                    self.data = self.data = Data(compra = { 
+                        data : {
+                            "quantidade": quantidade,
+                            "valor": valor
+                            }
+                        })
+                else:
+                    self.data = self.data = Data(venda = { 
+                        data : {
+                            "quantidade": quantidade,
+                            "valor": valor
+                            }
+                        })
         if self.codigo is not None:
             self.info = Info(self.codigo)
             if self.info.getCurrency() == "USD":

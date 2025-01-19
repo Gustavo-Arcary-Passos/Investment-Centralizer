@@ -212,7 +212,7 @@ class AtivosWindow(QWidget):
         # Data de compra do ativo
         data_compra_ativo_label = QLabel("Data de compra:")
         self.add_data_compra_ativo_text = QDateEdit()
-        self.add_data_compra_ativo_text.setDisplayFormat("yyyy-MM-dd")
+        self.add_data_compra_ativo_text.setDisplayFormat("dd/MM/yyyy")
         self.add_data_compra_ativo_text.setMinimumDate(QDate(1950, 1, 1))
         self.add_data_compra_ativo_text.setMaximumDate(QDate(2100, 12, 31))
         data_layout = QHBoxLayout()
@@ -254,7 +254,7 @@ class AtivosWindow(QWidget):
             self.add_codigo_ativo_text.text(),
             self.add_categoria_ativo_text.text(),
             self.add_custodia_ativo_text.text(),
-            self.add_data_compra_ativo_text.date().toString("dd/MM/yyyy"),
+            self.add_data_compra_ativo_text.date().toString("yyyy-MM-dd"),
             self.add_quantidade_compra_ativo_text.text(),
             self.add_valor_unitario_compra_ativo_text.text()
         ))
@@ -265,6 +265,22 @@ class AtivosWindow(QWidget):
         main_layout.addLayout(confirm_button_layout)
 
         return main_layout
+    
+    def ChangeAtivo2Portfolio(self, old_name, old_custody,nome, codigo, categoria, custodia, data_compra, quantidade_compra, valor_unitario, sell = False):
+        if not nome.strip() or not codigo.strip() or not categoria.strip() or not custodia.strip() or not quantidade_compra.strip() or not valor_unitario.strip():
+            print("Erro: Todos os campos devem ser preenchidos.")
+            return
+
+        try:
+            quantidade_compra = float(quantidade_compra)
+            valor_unitario = float(valor_unitario)
+            ativo = Ativo(ativo = nome,categoria= categoria,custodia = custodia, codigo = codigo, quantidade = quantidade_compra, data = data_compra, valor = valor_unitario, sell = sell)
+            self.portfolio_window.userPortfolio.editAtivoPortfolio(old_name,old_custody,ativo)
+            self.portfolio_window.on_active()
+            
+        except ValueError:
+            print("Erro: Quantidade e Valor Unitário devem ser números válidos.")
+        pass
     
     def ChangeAtivoData(self, ativo):
         ChangeAtivo = QVBoxLayout()
@@ -345,15 +361,18 @@ class AtivosWindow(QWidget):
         confirm_button_layout = QHBoxLayout()
         
         confirm_button = QPushButton("Confirmar")
-        # confirm_button.clicked.connect(lambda: self.AddAtivo2Portfolio(
-        #     self.nome_ativo_text.text(),
-        #     self.codigo_ativo_text.text(),
-        #     self.categoria_ativo_text.text(),
-        #     self.custodia_ativo_text.text(),
-        #     self.data_compra_ativo_text.date().toString("yyyy-MM-dd"),
-        #     self.quantidade_compra_ativo_text.text(),
-        #     valor_unitario_compra_ativo_text.text()
-        # ))
+        confirm_button.clicked.connect(lambda: self.ChangeAtivo2Portfolio(
+            ativo.getNome(),
+            ativo.getCustodia(),
+            self.nome_ativo_text.text(),
+            self.codigo_ativo_text.text(),
+            self.categoria_ativo_text.text(),
+            self.custodia_ativo_text.text(),
+            self.data_compra_ativo_text.date().toString("yyyy-MM-dd"),
+            self.quantidade_compra_ativo_text.text(),
+            valor_unitario_compra_ativo_text.text(),
+            sell = not radio_nao.isChecked()
+        ))
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Minimum)
         confirm_button_layout.addWidget(spacer)

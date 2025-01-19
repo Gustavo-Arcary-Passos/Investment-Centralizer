@@ -17,6 +17,15 @@ class Portfolio:
         
         return None
 
+    def getAtivoIndex(self,name,custody):
+        for index in range(0,len(self.ativos)):
+            ativo = self.ativos[index]
+            ativoProcurado = Ativo(ativo)
+            if ativoProcurado.getNome() == name and ativoProcurado.getCustodia() == custody:
+                return ativoProcurado, index
+        
+        return None, None
+
     def getPatrimonio(self):
         patrimonioAcumulado = 0
         for ativo in self.ativos:
@@ -90,5 +99,18 @@ class Portfolio:
             
             return 
         self.ativos.append(ativo.get())
-    
 
+    def editAtivoPortfolio(self,name,custody,ativoInfo):
+        ativoAntigo,index = self.getAtivoIndex(name,custody)
+        if ativoAntigo is None:
+            self.addAtivoPortfolio(ativoInfo)
+            return
+        dic = ativoAntigo.getData().get()
+        for data in dic["compra"]:
+            ativoInfo.compra(dic["compra"][data]["quantidade"],data,dic["compra"][data]["valor"])
+
+        for data in dic["venda"]:
+            ativoInfo.venda(dic["venda"][data]["quantidade"],data,dic["venda"][data]["valor"])
+
+        del self.ativos[index]
+        self.addAtivoPortfolio(ativoInfo)
