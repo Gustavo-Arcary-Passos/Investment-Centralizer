@@ -11,26 +11,6 @@ from PyQt5.QtGui import QDoubleValidator
 from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
 from functools import partial
 
-def addButton():
-    button = QPushButton("+")
-    style = """
-                QPushButton {
-                    text-align: center;
-                    background-color: #3498db;
-                    color: #38ADFC;
-                    border-radius: 10px;
-                    padding: 10px;
-                    font-size: 32px;
-                    font-weight: bold;
-                }
-                QPushButton:hover {
-                    background-color: #2980b9;
-                    color: #2778AE;
-                }
-            """
-    button.setStyleSheet(style)
-    return button
-
 def create_ListWidget():
     listWidget = QListWidget()
     listWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -67,9 +47,6 @@ class AtivosWindow(QWidget):
     def __init__(self, portfolio_window):
         super().__init__()
         self.portfolio_window = portfolio_window
-        self.editAtivo = self.ChangeAtivoData()
-        self.listAllAtivo = []
-        self.listbutton = []
 
     def create_button_action(self,ativo):
         print(f"clicado {ativo.getNome()}")
@@ -119,7 +96,7 @@ class AtivosWindow(QWidget):
             """
             label = NonInteractiveLabel(label_info) 
             label.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-            
+            list_item.setData(Qt.UserRole, ativo)
             list_item.setSizeHint(QSize(item_widht, item_height))
             listaAtivoList[count].addItem(list_item)
             listaAtivoList[count].setItemWidget(list_item, label)
@@ -127,7 +104,30 @@ class AtivosWindow(QWidget):
             count += 1
             if count == 4:
                 count = 0
-
+        list_item = QListWidgetItem()
+        list_item.setData(Qt.UserRole, None)
+        label = NonInteractiveLabel(f"""
+                <div style="text-align: center; font-size: 32px">
+                    <b>+</b>
+                </div>
+            """)
+        label.setStyleSheet('''
+            QLabel {
+                color: #38ADFC;
+                font-size: 32px;
+                font-weight: bold;
+            }
+            QLabel:hover {
+                background-color: #2980b9;
+                color: #2778AE;
+            }
+        ''') 
+        label.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+            
+        list_item.setSizeHint(QSize(item_widht, item_height))
+        listaAtivoList[count].addItem(list_item)
+        listaAtivoList[count].setItemWidget(list_item, label)
+        
         self.listAtivoCollumnOne.itemClicked.connect(self.on_item_clicked)
         self.listAtivoCollumnTwo.itemClicked.connect(self.on_item_clicked)
         self.listAtivoCollumnThree.itemClicked.connect(self.on_item_clicked)
@@ -141,11 +141,13 @@ class AtivosWindow(QWidget):
     def on_item_clicked(self, item):
         ativo = item.data(Qt.UserRole)
         if ativo is not None:
+            print(f"{ativo.getNome()}")
             self.portfolio_window.on_active(
                 edit = True,
                 ativoData = ativo
             )
         else:
+            print("None")
             self.portfolio_window.on_active(
                 add = True
             )
@@ -174,73 +176,73 @@ class AtivosWindow(QWidget):
 
         # Nome do ativo
         nome_ativo_label = QLabel("Nome:")
-        nome_ativo_text = QLineEdit()
-        nome_ativo_text.setPlaceholderText("Nome")
+        self.add_nome_ativo_text = QLineEdit()
+        self.add_nome_ativo_text.setPlaceholderText("Nome")
         nome_layout = QHBoxLayout()
         nome_layout.addWidget(nome_ativo_label)
-        nome_layout.addWidget(nome_ativo_text)
+        nome_layout.addWidget(self.add_nome_ativo_text)
         main_layout.addLayout(nome_layout)
 
         codigo_ativo_label = QLabel("Código:")
-        codigo_ativo_text = QLineEdit()
-        codigo_ativo_text.setPlaceholderText("Código")
+        self.add_codigo_ativo_text = QLineEdit()
+        self.add_codigo_ativo_text.setPlaceholderText("Código")
         codigo_layout = QHBoxLayout()
         codigo_layout.addWidget(codigo_ativo_label)
-        codigo_layout.addWidget(codigo_ativo_text)
+        codigo_layout.addWidget(self.add_codigo_ativo_text)
         main_layout.addLayout(codigo_layout)
 
         # Categoria do ativo
         categoria_ativo_label = QLabel("Categoria:")
-        categoria_ativo_text = QLineEdit()
-        categoria_ativo_text.setPlaceholderText("Categoria")
+        self.add_categoria_ativo_text = QLineEdit()
+        self.add_categoria_ativo_text.setPlaceholderText("Categoria")
         categoria_layout = QHBoxLayout()
         categoria_layout.addWidget(categoria_ativo_label)
-        categoria_layout.addWidget(categoria_ativo_text)
+        categoria_layout.addWidget(self.add_categoria_ativo_text)
         main_layout.addLayout(categoria_layout)
 
         # Custódia do ativo
         custodia_ativo_label = QLabel("Custódia:")
-        custodia_ativo_text = QLineEdit()
-        custodia_ativo_text.setPlaceholderText("Custódia")
+        self.add_custodia_ativo_text = QLineEdit()
+        self.add_custodia_ativo_text.setPlaceholderText("Custódia")
         custodia_layout = QHBoxLayout()
         custodia_layout.addWidget(custodia_ativo_label)
-        custodia_layout.addWidget(custodia_ativo_text)
+        custodia_layout.addWidget(self.add_custodia_ativo_text)
         main_layout.addLayout(custodia_layout)
 
         # Data de compra do ativo
         data_compra_ativo_label = QLabel("Data de compra:")
-        data_compra_ativo_text = QDateEdit()
-        data_compra_ativo_text.setDisplayFormat("yyyy-MM-dd")
-        data_compra_ativo_text.setMinimumDate(QDate(1950, 1, 1))
-        data_compra_ativo_text.setMaximumDate(QDate(2100, 12, 31))
+        self.add_data_compra_ativo_text = QDateEdit()
+        self.add_data_compra_ativo_text.setDisplayFormat("yyyy-MM-dd")
+        self.add_data_compra_ativo_text.setMinimumDate(QDate(1950, 1, 1))
+        self.add_data_compra_ativo_text.setMaximumDate(QDate(2100, 12, 31))
         data_layout = QHBoxLayout()
         data_layout.addWidget(data_compra_ativo_label)
-        data_layout.addWidget(data_compra_ativo_text)
+        data_layout.addWidget(self.add_data_compra_ativo_text)
         main_layout.addLayout(data_layout)
 
         # Quantidade
         quantidade_compra_ativo_label = QLabel("Quantidade:")
-        quantidade_compra_ativo_text = QLineEdit()
+        self.add_quantidade_compra_ativo_text = QLineEdit()
         quantidade_compra_validador = QDoubleValidator(0.0, 1000.0, 5)
         quantidade_compra_validador.setNotation(QDoubleValidator.StandardNotation)
         locale = QLocale(QLocale.system().name())
         quantidade_compra_validador.setLocale(locale)
-        quantidade_compra_ativo_text.setValidator(quantidade_compra_validador)
+        self.add_quantidade_compra_ativo_text.setValidator(quantidade_compra_validador)
         quantidade_layout = QHBoxLayout()
         quantidade_layout.addWidget(quantidade_compra_ativo_label)
-        quantidade_layout.addWidget(quantidade_compra_ativo_text)
+        quantidade_layout.addWidget(self.add_quantidade_compra_ativo_text)
         main_layout.addLayout(quantidade_layout)
 
         # Valor unitário
         valor_unitario_compra_ativo_label = QLabel("Valor unitário:")
-        valor_unitario_compra_ativo_text = QLineEdit()
+        self.add_valor_unitario_compra_ativo_text = QLineEdit()
         valor_unitario_compra_validador = QDoubleValidator(0.0, 1000000.0, 5)
         valor_unitario_compra_validador.setNotation(QDoubleValidator.StandardNotation)
         valor_unitario_compra_validador.setLocale(locale)
-        valor_unitario_compra_ativo_text.setValidator(valor_unitario_compra_validador)
+        self.add_valor_unitario_compra_ativo_text.setValidator(valor_unitario_compra_validador)
         valor_unitario_layout = QHBoxLayout()
         valor_unitario_layout.addWidget(valor_unitario_compra_ativo_label)
-        valor_unitario_layout.addWidget(valor_unitario_compra_ativo_text)
+        valor_unitario_layout.addWidget(self.add_valor_unitario_compra_ativo_text)
         main_layout.addLayout(valor_unitario_layout)
 
         confirm_button_layout = QHBoxLayout()
@@ -248,13 +250,13 @@ class AtivosWindow(QWidget):
         # Botão de confirmação
         confirm_button = QPushButton("Confirmar")
         confirm_button.clicked.connect(lambda: self.AddAtivo2Portfolio(
-            nome_ativo_text.text(),
-            codigo_ativo_text.text(),
-            categoria_ativo_text.text(),
-            custodia_ativo_text.text(),
-            data_compra_ativo_text.date().toString("dd/MM/yyyy"),
-            quantidade_compra_ativo_text.text(),
-            valor_unitario_compra_ativo_text.text()
+            self.add_nome_ativo_text.text(),
+            self.add_codigo_ativo_text.text(),
+            self.add_categoria_ativo_text.text(),
+            self.add_custodia_ativo_text.text(),
+            self.add_data_compra_ativo_text.date().toString("dd/MM/yyyy"),
+            self.add_quantidade_compra_ativo_text.text(),
+            self.add_valor_unitario_compra_ativo_text.text()
         ))
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Minimum)
@@ -264,11 +266,7 @@ class AtivosWindow(QWidget):
 
         return main_layout
     
-    def go2ChangeAtivoData(self,ativo):
-        self.editChangeAtivoData(ativo)
-        return self.editAtivo
-    
-    def ChangeAtivoData(self):
+    def ChangeAtivoData(self, ativo):
         ChangeAtivo = QVBoxLayout()
 
         nome_ativo_label = QLabel("Nome:")
@@ -361,6 +359,8 @@ class AtivosWindow(QWidget):
         confirm_button_layout.addWidget(spacer)
         confirm_button_layout.addWidget(confirm_button)
         ChangeAtivo.addLayout(confirm_button_layout)
+
+        self.editChangeAtivoData(ativo)
 
         return ChangeAtivo
 

@@ -105,13 +105,13 @@ class PortFolioWindow(QWidget):
             self.ativosWindow = AtivosWindow(self)
         ativo = QWidget() 
         ativo_layout = QHBoxLayout()
-        print("Äqui")
+        
         if not add and not edit:
             listAtivos_layout = self.ativosWindow.AtivosSetUp()
         elif add:
             listAtivos_layout = self.ativosWindow.AddAtivo()
         elif edit:
-            listAtivos_layout = self.ativosWindow.go2ChangeAtivoData(ativoData)
+            listAtivos_layout = self.ativosWindow.ChangeAtivoData(ativoData)
 
         spacer_layout = QHBoxLayout()
         spacerWidget = QWidget()
