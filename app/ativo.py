@@ -5,13 +5,14 @@ from app.yahoo_api import Info
 from app.data import Data
 
 class Ativo:
-    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None, sell = False):
+    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None, sell = False, tags = []):
         if isinstance(ativo, dict):
             self.nome = ativo["nome"]
             self.custodia = ativo["custodia"]
             self.categoria = ativo["categoria"]
             self.codigo = ativo.get("codigo", None)
             self.quantidade = ativo["quantidade"]
+            self.tags = ativo["tags"]
             if isinstance(ativo["data"], str):
                 print(sell)
                 if not sell:
@@ -29,13 +30,14 @@ class Ativo:
                             }
                         })
             elif isinstance(ativo["data"], dict):
-                self.data = Data(compra = ativo["data"]["compra"], venda = ativo["data"]["venda"]) 
+                self.data = Data(compra = ativo["data"]["compra"], venda = ativo["data"]["venda"])
         elif isinstance(ativo, str):
             self.nome = ativo
             self.custodia = custodia
             self.categoria = categoria
             self.codigo = codigo
             self.quantidade = quantidade
+            self.tags = tags
             if isinstance(data, str):
                 print(sell)
                 if not sell:
@@ -122,6 +124,9 @@ class Ativo:
         precoMedio = self.getPrecoMedio()
         return (self.info.getValue() - precoMedio)*self.quantidade
     
+    def getTags(self):
+        return self.tags
+    
     def get(self):
         ativo = {
             "nome": self.nome,
@@ -130,6 +135,7 @@ class Ativo:
             "codigo": self.codigo,
             "quantidade": self.quantidade,
             "data": self.data.get(),
+            "tags": self.tags(),
         }
 
         return ativo
@@ -148,3 +154,12 @@ class Ativo:
 
     def setCategoria(self, categoria):
         self.categoria = categoria
+
+    def setNewTag(self,tagNome):
+        self.tags.append(tagNome)
+
+    def deleteTag(self,tagNome):
+        for index in range(0,len(self.tags)):
+            tag = self.tags[index]
+            if tagNome != tag:
+                del self.tags[index]

@@ -3,11 +3,13 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.ativo import Ativo
 from app.data import Data
+from app.tag import Tag
 
 class Portfolio:
     def __init__(self, portfolio):
         self.ativos = portfolio["ativos"] # lista com todos os ativos
         self.estrategia = portfolio["estrategia"]
+        self.tags = portfolio["tags"]
 
     def getAtivo(self,name,custody):
         for ativo in self.ativos:
@@ -46,6 +48,7 @@ class Portfolio:
         portifolio = {
             "ativos": self.ativos,
             "estrategia": self.estrategia,
+            "tags": self.tags,
         }
         return portifolio
     
@@ -80,6 +83,16 @@ class Portfolio:
                 custodia = ativo.getCustodia()
                 dicby[custodia] = dicby.get(custodia,0) + precoAtual
         return dicby
+    
+    def getTags(self):
+        return self.tags
+    
+    def addTag(self,tagName,tagColor):
+        self.tags[tagName]["color"] = tagColor
+
+    def deleteTag(self,tagName):
+        if self.tags.get(tagName, None) is not None:
+            del self.tags[tagName]
     
     def setAtivo(self,name,custody,ativo):
         for pos in range(0,len(self.ativos)):
