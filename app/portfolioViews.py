@@ -14,6 +14,7 @@ from app.investments import Investment
 from app.QtCreateFunc.helper import createQToolButton
 from app.portfolioTab.overview import OverviewWindow
 from app.portfolioTab.ativos import AtivosWindow
+from app.portfolioTab.tag import TagsWindow
 
 class PortFolioWindow(QWidget):
     def __init__(self):
@@ -34,25 +35,22 @@ class PortFolioWindow(QWidget):
 
         overview_toolbutton = createQToolButton("Overview", QSizePolicy.Expanding)
         active_toolbutton = createQToolButton("Ativos", QSizePolicy.Expanding)
-        tag_toolbutton = createQToolButton("Tags", QSizePolicy.Expanding)
         estrategy_toolbutton = createQToolButton("Estrategia", QSizePolicy.Expanding)
         metas_toolbutton = createQToolButton("Metas", QSizePolicy.Expanding)
         destaque_toolbutton = createQToolButton("Destaques", QSizePolicy.Expanding)
 
         overview_toolbutton.clicked.connect(self.on_overview)
         active_toolbutton.clicked.connect(self.on_active)
-        tag_toolbutton.clicked.connect(self.on_tag)
         estrategy_toolbutton.clicked.connect(self.on_estrategy)
         metas_toolbutton.clicked.connect(self.on_metas)
         destaque_toolbutton.clicked.connect(self.on_destaque)
 
         ribbon.addWidget(overview_toolbutton)
         ribbon.addWidget(active_toolbutton)
-        ribbon.addWidget(tag_toolbutton)
         ribbon.addWidget(estrategy_toolbutton)
         ribbon.addWidget(metas_toolbutton)
         ribbon.addWidget(destaque_toolbutton)
-        # ribbon.addWidget(createQToolButton())
+        ribbon.addWidget(createQToolButton())
         ribbon.addWidget(createQToolButton())
         ribbon.addWidget(createQToolButton())
 
@@ -116,21 +114,21 @@ class PortFolioWindow(QWidget):
         elif edit:
             listAtivos_layout = self.ativosWindow.ChangeAtivoData(ativoData)
 
-        spacer_layout = QHBoxLayout()
-        spacerWidget = QWidget()
-        spacerWidget.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-        spacer_layout.addWidget(spacerWidget)
+        tag_layout = QHBoxLayout()
+        self.tagsWindow = TagsWindow(self)
+        tagList = self.tagsWindow.ListTags() 
+        tag_layout.addLayout(tagList)
 
         ativo_layout.addLayout(listAtivos_layout, stretch=14)
-        ativo_layout.addLayout(spacer_layout, stretch=4)
+        ativo_layout.addLayout(tag_layout, stretch=4)
 
         ativo.setLayout(ativo_layout)
 
         self.load_scene(ativo)
 
-    def on_tag(self):
-        content = QLabel("Cena de tags")
-        self.load_scene(content)
+    # def on_tag(self):
+    #     content = QLabel("Cena de tags")
+    #     self.load_scene(content)
 
     def on_estrategy(self):
         content = QLabel("Cena de Estratégia")
