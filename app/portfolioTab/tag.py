@@ -33,6 +33,8 @@ class TagsWindow(QWidget):
         
         """)
         self.listTagsWidget.installEventFilter(self)
+        self.listTagsWidget.setDragEnabled(True)
+        # self.listTagsWidget.setAcceptDrops(True)
 
         dicTags = self.portfolio_window.userPortfolio.getTags()
         for tag in dicTags:
@@ -137,26 +139,34 @@ class TagsWindow(QWidget):
         for item in selected_items:
             tag_data = item.data(Qt.UserRole)
             self.listTagsWidget.takeItem(self.listTagsWidget.row(item))
-        self.portfolio_window.userPortfolio.setTag(self.generateNewTagsDic())
     
     def generateNewTagsDic(self):
         newTags = {}
-        newTag = {
-            "name": "",
-            "color": []
-        }
         for i in range(self.listTagsWidget.count()):
             item = self.listTagsWidget.item(i)
-            tag_data = item.data(Qt.UserRole)
-            newTags[i] = newTag
-            newTags[i]["name"] = tag_data.getName()
-            newTags[i]["color"] = tag_data.getColor()
+            if item is not None: 
+                print(i)
+                tag_data = item.data(Qt.UserRole)
+                newTags[i] = {
+                    "name": tag_data.getName(),
+                    "color": tag_data.getColor()
+                }
         return newTags
             
 
     def eventFilter(self, source, event):
         if source == self.listTagsWidget and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Delete:
+                print("chamou")
                 self.deleteSelectedItems()
                 return True
         return super().eventFilter(source, event)
+    
+    def dropEvent(self, event):
+        # Verificar se o item foi arrastado dentro da própria lista
+        if event.source() == self.listTagsWidget:
+            # Impede a adição ou movimentação de um item dentro da mesma lista
+            event.setDropAction(Qt.IgnoreAction)
+            event.ignore()
+        else:
+            event.acceptProposedAction()

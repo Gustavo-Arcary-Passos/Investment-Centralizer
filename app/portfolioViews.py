@@ -20,6 +20,7 @@ class PortFolioWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.userPortfolio = None
+        self.current_scene = None
 
         main_layout = QHBoxLayout()
 
@@ -74,8 +75,20 @@ class PortFolioWindow(QWidget):
         self.username = portfolioName
         self.userPortfolio = Portfolio(Investment.getUserInvestment(portfolioName))
 
+    # def getUserPortfolioTags(self):
+    #     if self.userPortfolioTags == None:
+    #         self.userPortfolioTags = self.userPortfolio.getTags()
+    #     return self.userPortfolioTags
+
+    def persistyData(self):
+        if self.current_scene == "active":
+            print("Salvou")
+            self.userPortfolio.setTag(self.tagsWindow.generateNewTagsDic())
+
     def clear_dynamic_content(self):
         """Limpa o conteúdo do layout dinâmico."""
+        self.persistyData()
+        self.current_scene = None
         while self.dynamic_content_layout.count():
             child = self.dynamic_content_layout.takeAt(0)
             if child.widget():
@@ -102,6 +115,7 @@ class PortFolioWindow(QWidget):
         self.load_scene(overview)
 
     def on_active(self, add = False, edit = False, ativoData = None):
+        self.current_scene = "active"
         if not hasattr(self, 'ativosWindow') or self.ativosWindow is None:
             self.ativosWindow = AtivosWindow(self)
         ativo = QWidget() 
