@@ -87,12 +87,16 @@ class Portfolio:
     def getTags(self):
         return self.tags
     
-    def addTag(self,tagName,tagColor):
-        self.tags[tagName]["color"] = tagColor
+    def addTag(self,pos,tagName,tagColor):
+        self.tags[pos] = {
+            "name": "",
+            "color": []
+        }
+        self.tags[pos]["name"] = tagName
+        self.tags[pos]["color"] = tagColor
 
-    def deleteTag(self,tagName):
-        if self.tags.get(tagName, None) is not None:
-            del self.tags[tagName]
+    def setTag(self, newTags):
+        self.tags = newTags
     
     def setAtivo(self,name,custody,ativo):
         for pos in range(0,len(self.ativos)):
