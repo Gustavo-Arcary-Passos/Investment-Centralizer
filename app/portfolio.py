@@ -85,6 +85,7 @@ class Portfolio:
         return dicby
     
     def getTags(self):
+        print(f"Get tags: {self.tags}")
         return self.tags
     
     def addTag(self,pos,tagName,tagColor):
@@ -96,6 +97,7 @@ class Portfolio:
         self.tags[pos]["color"] = tagColor
 
     def setTag(self, newTags):
+        print(f"Set tags: {newTags}")
         self.tags = newTags
     
     def setAtivo(self,name,custody,ativo):

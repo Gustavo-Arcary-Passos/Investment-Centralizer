@@ -43,7 +43,9 @@ class Investment(Reader):
         Investment._writeDb(filePath, dados)
 
     @staticmethod
-    def updateUserInvestment(user,userPortfolio, filePath = None):
+    def updateUserInvestment(user,userPortfolio, userTagList = None, filePath = None):
+        if userTagList is not None and len(userTagList) > 0:
+            userPortfolio.setTag(userTagList)
         filePath = filePath or Investment.getFilePath()
         dados = Investment._readDb(filePath)
         dados[user] = userPortfolio.getPortfolio()

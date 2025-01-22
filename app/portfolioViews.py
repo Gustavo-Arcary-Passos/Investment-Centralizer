@@ -69,20 +69,14 @@ class PortFolioWindow(QWidget):
         self.setLayout(main_layout)
 
     def save_data(self):
-        Investment.updateUserInvestment(self.username,self.userPortfolio)
+        Investment.updateUserInvestment(self.username,self.userPortfolio, userTagList = self.tagsWindow.generateNewTagsDic())
     
     def getUserPortfolio(self, portfolioName):
         self.username = portfolioName
         self.userPortfolio = Portfolio(Investment.getUserInvestment(portfolioName))
 
-    # def getUserPortfolioTags(self):
-    #     if self.userPortfolioTags == None:
-    #         self.userPortfolioTags = self.userPortfolio.getTags()
-    #     return self.userPortfolioTags
-
     def persistyData(self):
         if self.current_scene == "active":
-            print("Salvou")
             self.userPortfolio.setTag(self.tagsWindow.generateNewTagsDic())
 
     def clear_dynamic_content(self):
@@ -120,29 +114,23 @@ class PortFolioWindow(QWidget):
             self.ativosWindow = AtivosWindow(self)
         ativo = QWidget() 
         ativo_layout = QHBoxLayout()
+
+        self.tagsWindow = TagsWindow(self)
         
         if not add and not edit:
             listAtivos_layout = self.ativosWindow.AtivosSetUp()
+            tagList = self.tagsWindow.ListTags() 
         elif add:
             listAtivos_layout = self.ativosWindow.AddAtivo()
         elif edit:
             listAtivos_layout = self.ativosWindow.ChangeAtivoData(ativoData)
 
-        tag_layout = QHBoxLayout()
-        self.tagsWindow = TagsWindow(self)
-        tagList = self.tagsWindow.ListTags() 
-        tag_layout.addLayout(tagList)
-
         ativo_layout.addLayout(listAtivos_layout, stretch=14)
-        ativo_layout.addLayout(tag_layout, stretch=4)
+        ativo_layout.addLayout(tagList, stretch=4)
 
         ativo.setLayout(ativo_layout)
 
         self.load_scene(ativo)
-
-    # def on_tag(self):
-    #     content = QLabel("Cena de tags")
-    #     self.load_scene(content)
 
     def on_estrategy(self):
         content = QLabel("Cena de Estratégia")

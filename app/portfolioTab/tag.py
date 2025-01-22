@@ -57,6 +57,7 @@ class TagsWindow(QWidget):
 
         dicTags = self.portfolio_window.userPortfolio.getTags()
         for tag in dicTags:
+            print(dicTags[tag])
             list_item = QListWidgetItem()
             tagType = Tag(tag = dicTags[tag])
             list_item.setData(Qt.UserRole, tagType)
@@ -157,15 +158,20 @@ class TagsWindow(QWidget):
         selected_items = self.listTagsWidget.selectedItems()
         for item in selected_items:
             tag_data = item.data(Qt.UserRole)
+            print(f"Deleta: {tag_data}")
             self.listTagsWidget.takeItem(self.listTagsWidget.row(item))
+            self.portfolio_window.ativosWindow.deleteTagAllAtivoList(tag_data.getName())
+            item.setData(Qt.UserRole, None)
+            self.portfolio_window.userPortfolio.setTag(self.generateNewTagsDic())
     
     def generateNewTagsDic(self):
         newTags = {}
+        print("GenerateNewTags")
         for i in range(self.listTagsWidget.count()):
             item = self.listTagsWidget.item(i)
-            if item is not None: 
-                print(i)
+            if item and item is not None:
                 tag_data = item.data(Qt.UserRole)
+                print(f"Tag: {tag_data}")
                 newTags[i] = {
                     "name": tag_data.getName(),
                     "color": tag_data.getColor()

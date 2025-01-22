@@ -14,7 +14,6 @@ class Ativo:
             self.quantidade = ativo["quantidade"]
             self.tags = ativo["tags"]
             if isinstance(ativo["data"], str):
-                print(sell)
                 if not sell:
                     self.data = Data(compra = { 
                         ativo["data"] : {
@@ -39,7 +38,6 @@ class Ativo:
             self.quantidade = quantidade
             self.tags = tags
             if isinstance(data, str):
-                print(sell)
                 if not sell:
                     self.data = self.data = Data(compra = { 
                         data : {
@@ -162,14 +160,13 @@ class Ativo:
         self.tags.append(tagNome)
 
     def deleteTag(self,tagNome):
-        for index in range(0,len(self.tags)):
-            tag = self.tags[index]
-            if tagNome != tag:
-                del self.tags[index]
+        for tag in self.tags:
+            if self.tags[tag]["name"] == tagNome:
+                del self.tags[tag]
+                return
 
     def addTag(self, dicTag):
         for tag in self.tags:
-            print(tag)
             if self.tags[tag]["name"] == dicTag["name"]:
                 return
         self.tags[len(self.tags)] = dicTag

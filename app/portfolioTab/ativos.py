@@ -35,10 +35,10 @@ class AtivoDropTagList(QListWidget):
         if item:
             current_data = item.data(Qt.UserRole)
             data = ast.literal_eval(data)
-            print(data)
+            if current_data is None:
+                return
             current_data.addTag(data)
             item.setData(Qt.UserRole, current_data)
-            # item.setText(f"{item.text()} ({', '.join(current_data)})")
 
         event.accept()
 
@@ -425,3 +425,19 @@ class AtivosWindow(QWidget):
         self.codigo_ativo_text.setText(ativo.getCodigo())
         self.categoria_ativo_text.setText(ativo.getCategoria())
         self.custodia_ativo_text.setText(ativo.getCustodia())
+
+    def deleteTagAllAtivoList(self, tagName):
+        listaAtivoList = []
+        listaAtivoList.append(self.listAtivoCollumnOne)
+        listaAtivoList.append(self.listAtivoCollumnTwo)
+        listaAtivoList.append(self.listAtivoCollumnThree)
+        listaAtivoList.append(self.listAtivoCollumnFour)
+        print("Deleta dos ativos a tag")
+        for ativos in listaAtivoList:
+            for row in range(ativos.count()):
+                item = ativos.item(row)
+                if item:
+                    ativo = item.data(Qt.UserRole)
+                    if ativo is not None:
+                        ativo.deleteTag(tagName)
+                        item.setData(Qt.UserRole, ativo)
