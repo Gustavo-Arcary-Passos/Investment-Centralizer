@@ -3,11 +3,11 @@ import sys
 import unidecode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.tag import Tag
-from PyQt5.QtCore import Qt, QDate, QLocale, QSize, QEvent
+from PyQt5.QtCore import Qt, QDate, QLocale, QSize, QEvent, QMimeData
 from PyQt5.QtWidgets import (
     QButtonGroup, QColorDialog, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
 )
-from PyQt5.QtGui import QDoubleValidator, QColor
+from PyQt5.QtGui import QDoubleValidator, QColor, QDrag
 from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
 from functools import partial
 
@@ -16,6 +16,28 @@ class NonInteractiveLabel(QLabel):
         super().__init__(text)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
+class DragTagList(QListWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setSelectionMode(QListWidget.SingleSelection)
+        self.setDragEnabled(True)
+
+    def startDrag(self, supportedActions):
+        item = self.currentItem()
+        if not item:
+            return
+        
+        data = item.data(Qt.UserRole)
+        if data is None:
+            return
+        
+        drag = QDrag(self)
+        mimeData = QMimeData()
+        mimeData.setData("application/tag-item-data", str(data).encode())
+        drag.setMimeData(mimeData)
+
+        drag.exec_(Qt.MoveAction)
+
 class TagsWindow(QWidget):
     def __init__(self, portfolio_window):
         super().__init__()
@@ -23,18 +45,15 @@ class TagsWindow(QWidget):
         self.listTagsWidget = None
 
     def ListTags(self):
-        self.listTagsWidget = QListWidget()
+        self.listTagsWidget = DragTagList()
         self.listTagsWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.listTagsWidget.setStyleSheet("""
         QListWidget {
             border: none;
             background-color: transparent;
         }
-        
         """)
         self.listTagsWidget.installEventFilter(self)
-        self.listTagsWidget.setDragEnabled(True)
-        # self.listTagsWidget.setAcceptDrops(True)
 
         dicTags = self.portfolio_window.userPortfolio.getTags()
         for tag in dicTags:
@@ -152,21 +171,10 @@ class TagsWindow(QWidget):
                     "color": tag_data.getColor()
                 }
         return newTags
-            
 
     def eventFilter(self, source, event):
         if source == self.listTagsWidget and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Delete:
-                print("chamou")
                 self.deleteSelectedItems()
                 return True
         return super().eventFilter(source, event)
-    
-    def dropEvent(self, event):
-        # Verificar se o item foi arrastado dentro da própria lista
-        if event.source() == self.listTagsWidget:
-            # Impede a adição ou movimentação de um item dentro da mesma lista
-            event.setDropAction(Qt.IgnoreAction)
-            event.ignore()
-        else:
-            event.acceptProposedAction()

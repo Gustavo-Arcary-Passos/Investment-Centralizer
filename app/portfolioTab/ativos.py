@@ -1,4 +1,5 @@
 import os
+import ast
 import sys
 import unidecode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,8 +12,38 @@ from PyQt5.QtGui import QDoubleValidator
 from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
 from functools import partial
 
+class AtivoDropTagList(QListWidget): 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/tag-item-data"):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat("application/tag-item-data"):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        data = event.mimeData().data("application/tag-item-data").data().decode()
+        item = self.itemAt(event.pos())
+        if item:
+            current_data = item.data(Qt.UserRole)
+            data = ast.literal_eval(data)
+            print(data)
+            current_data.addTag(data)
+            item.setData(Qt.UserRole, current_data)
+            # item.setText(f"{item.text()} ({', '.join(current_data)})")
+
+        event.accept()
+
 def create_ListWidget():
-    listWidget = QListWidget()
+    listWidget = AtivoDropTagList()
     listWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     listWidget.setStyleSheet("""
         QListWidget {
@@ -61,6 +92,12 @@ class AtivosWindow(QWidget):
         self.listAtivoCollumnTwo = create_ListWidget()
         self.listAtivoCollumnThree = create_ListWidget()
         self.listAtivoCollumnFour = create_ListWidget()
+
+        self.listAtivoCollumnOne.setAcceptDrops(True)
+        self.listAtivoCollumnTwo.setAcceptDrops(True)
+        self.listAtivoCollumnThree.setAcceptDrops(True)
+        self.listAtivoCollumnFour.setAcceptDrops(True)
+
         listaAtivoList = []
         listaAtivoList.append(self.listAtivoCollumnOne)
         listaAtivoList.append(self.listAtivoCollumnTwo)

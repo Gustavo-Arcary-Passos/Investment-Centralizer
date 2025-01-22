@@ -8,6 +8,9 @@ class Tag():
             self.tag = tag["name"]
             self.color = tag["color"]
 
+    def __str__(self):
+        return f"{{'name': '{self.tag}','color':[{self.color[0]},{self.color[1]},{self.color[2]}]}}"
+
     def getName(self):
         return self.tag
     

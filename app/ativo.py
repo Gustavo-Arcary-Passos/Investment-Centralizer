@@ -58,6 +58,9 @@ class Ativo:
             self.info = Info(self.codigo)
             if self.info.getCurrency() == "USD":
                 self.conversao = Info("BRL=X")
+
+    def __str__(self):
+        return f"nome: {self.nome}\ncustodia:{self.custodia}"
         
     def compra(self, quantidade, data, valor = None):
         self.quantidade += quantidade
@@ -163,3 +166,10 @@ class Ativo:
             tag = self.tags[index]
             if tagNome != tag:
                 del self.tags[index]
+
+    def addTag(self, dicTag):
+        for tag in self.tags:
+            print(tag)
+            if self.tags[tag]["name"] == dicTag["name"]:
+                return
+        self.tags[len(self.tags)] = dicTag
