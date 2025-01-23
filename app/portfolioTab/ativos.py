@@ -433,11 +433,16 @@ class AtivosWindow(QWidget):
         listaAtivoList.append(self.listAtivoCollumnThree)
         listaAtivoList.append(self.listAtivoCollumnFour)
         print("Deleta dos ativos a tag")
+        lista = 0
         for ativos in listaAtivoList:
+            linha = 0
             for row in range(ativos.count()):
                 item = ativos.item(row)
                 if item:
                     ativo = item.data(Qt.UserRole)
                     if ativo is not None:
+                        print(f"Deleta {tagName} {lista}|{linha}")
                         ativo.deleteTag(tagName)
                         item.setData(Qt.UserRole, ativo)
+                linha += 1
+            lista += 1

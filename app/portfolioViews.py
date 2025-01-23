@@ -69,19 +69,21 @@ class PortFolioWindow(QWidget):
         self.setLayout(main_layout)
 
     def save_data(self):
-        Investment.updateUserInvestment(self.username,self.userPortfolio, userTagList = self.tagsWindow.generateNewTagsDic())
+        print("save_data")
+        Investment.updateUserInvestment(self.username,self.userPortfolio) #  userTagList = self.tagsWindow.generateNewTagsDic()
     
     def getUserPortfolio(self, portfolioName):
         self.username = portfolioName
         self.userPortfolio = Portfolio(Investment.getUserInvestment(portfolioName))
 
     def persistyData(self):
+        print("persistyData")
         if self.current_scene == "active":
             self.userPortfolio.setTag(self.tagsWindow.generateNewTagsDic())
 
     def clear_dynamic_content(self):
         """Limpa o conteúdo do layout dinâmico."""
-        self.persistyData()
+        print("clear_dynamic_content")
         self.current_scene = None
         while self.dynamic_content_layout.count():
             child = self.dynamic_content_layout.takeAt(0)
@@ -109,7 +111,7 @@ class PortFolioWindow(QWidget):
         self.load_scene(overview)
 
     def on_active(self, add = False, edit = False, ativoData = None):
-        self.current_scene = "active"
+        print("on_active")
         if not hasattr(self, 'ativosWindow') or self.ativosWindow is None:
             self.ativosWindow = AtivosWindow(self)
         ativo = QWidget() 
@@ -119,6 +121,7 @@ class PortFolioWindow(QWidget):
         
         if not add and not edit:
             listAtivos_layout = self.ativosWindow.AtivosSetUp()
+            print("tagList")
             tagList = self.tagsWindow.ListTags() 
         elif add:
             listAtivos_layout = self.ativosWindow.AddAtivo()
@@ -131,6 +134,7 @@ class PortFolioWindow(QWidget):
         ativo.setLayout(ativo_layout)
 
         self.load_scene(ativo)
+        self.current_scene = "active"
 
     def on_estrategy(self):
         content = QLabel("Cena de Estratégia")

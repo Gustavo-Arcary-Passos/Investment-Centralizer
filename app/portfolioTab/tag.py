@@ -176,6 +176,7 @@ class TagsWindow(QWidget):
                     "name": tag_data.getName(),
                     "color": tag_data.getColor()
                 }
+        print("Terminou")
         return newTags
 
     def eventFilter(self, source, event):
