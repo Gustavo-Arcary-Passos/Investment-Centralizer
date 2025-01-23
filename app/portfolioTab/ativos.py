@@ -304,15 +304,22 @@ class AtivosWindow(QWidget):
         return main_layout
     
     def ChangeAtivo2Portfolio(self, old_name, old_custody,nome, codigo, categoria, custodia, data_compra, quantidade_compra, valor_unitario, sell = False):
-        if not nome.strip() or not codigo.strip() or not categoria.strip() or not custodia.strip() or not quantidade_compra.strip() or not valor_unitario.strip():
+        print("ChangeAtivo2Portfolio")
+        if not nome.strip() or not codigo.strip() or not categoria.strip() or not custodia.strip(): # or not quantidade_compra.strip() or not valor_unitario.strip()
             print("Erro: Todos os campos devem ser preenchidos.")
             return
 
         try:
-            quantidade_compra = float(quantidade_compra)
-            valor_unitario = float(valor_unitario)
-            ativo = Ativo(ativo = nome,categoria= categoria,custodia = custodia, codigo = codigo, quantidade = quantidade_compra, data = data_compra, valor = valor_unitario, sell = sell)
+            quantidade_compra = float(quantidade_compra) if quantidade_compra else 0
+            valor_unitario = float(valor_unitario) if valor_unitario else 0
+            tags = self.portfolio_window.tagsWindow.generateNewTagsDic()
+            print(tags)
+            if quantidade_compra == 0 and valor_unitario == 0 :
+                data_compra = {"compra": {}, "venda": {}}
+            ativo = Ativo(ativo = nome,categoria= categoria,custodia = custodia, codigo = codigo, quantidade = quantidade_compra, data = data_compra, valor = valor_unitario, sell = sell, tags = tags)
+            print(ativo)
             self.portfolio_window.userPortfolio.editAtivoPortfolio(old_name,old_custody,ativo)
+            print("Saiu")
             self.portfolio_window.on_active()
             
         except ValueError:

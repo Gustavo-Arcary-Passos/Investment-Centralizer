@@ -107,8 +107,10 @@ class Portfolio:
                 self.ativos[pos] = ativo
 
     def addAtivoPortfolio(self,ativo):
+        print("addAtivoPortfolio")
         updateAtivo = self.getAtivo(ativo.getNome(),ativo.getCustodia())
         if updateAtivo is not None:
+            print("update")
             ativoData = ativo.getData().get()
             for data in ativoData["compra"]:
                 updateAtivo.compra(ativoData["compra"][data]["quantidade"],data,ativoData["compra"][data]["valor"])
@@ -117,19 +119,24 @@ class Portfolio:
             self.setAtivo(ativo.getNome(),ativo.getCustodia(),updateAtivo.get())
             
             return 
+        print("dont update")
         self.ativos.append(ativo.get())
 
     def editAtivoPortfolio(self,name,custody,ativoInfo):
+        print("editAtivoPortfolio")
         ativoAntigo,index = self.getAtivoIndex(name,custody)
         if ativoAntigo is None:
+            print("Novo")
             self.addAtivoPortfolio(ativoInfo)
             return
         dic = ativoAntigo.getData().get()
+        print(dic)
         for data in dic["compra"]:
             ativoInfo.compra(dic["compra"][data]["quantidade"],data,dic["compra"][data]["valor"])
 
         for data in dic["venda"]:
             ativoInfo.venda(dic["venda"][data]["quantidade"],data,dic["venda"][data]["valor"])
-
+        print(ativoInfo)
         del self.ativos[index]
+        print("Update")
         self.addAtivoPortfolio(ativoInfo)

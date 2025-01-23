@@ -44,7 +44,7 @@ class TagsWindow(QWidget):
         self.portfolio_window = portfolio_window
         self.listTagsWidget = None
 
-    def ListTags(self):
+    def ListTags(self, dicTags = {}, dragAble = True):
         self.listTagsWidget = DragTagList()
         self.listTagsWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.listTagsWidget.setStyleSheet("""
@@ -54,8 +54,10 @@ class TagsWindow(QWidget):
         }
         """)
         self.listTagsWidget.installEventFilter(self)
+        if not dragAble:
+            print("Dragabel disable")
+            self.listTagsWidget.setDragEnabled(False)
 
-        dicTags = self.portfolio_window.userPortfolio.getTags()
         for tag in dicTags:
             print(dicTags[tag])
             list_item = QListWidgetItem()
@@ -154,15 +156,17 @@ class TagsWindow(QWidget):
         self.listTagsWidget.setItemWidget(list_item, tag_label)
         self.portfolio_window.userPortfolio.addTag(self.listTagsWidget.count(),self.newTagName.text(),self.save_color)
     
-    def deleteSelectedItems(self):
+    def deleteSelectedItems(self, action1 = None, action2 = None):
         selected_items = self.listTagsWidget.selectedItems()
         for item in selected_items:
             tag_data = item.data(Qt.UserRole)
             print(f"Deleta: {tag_data}")
             self.listTagsWidget.takeItem(self.listTagsWidget.row(item))
-            self.portfolio_window.ativosWindow.deleteTagAllAtivoList(tag_data.getName())
+            if action1 is not None:
+                action1(tag_data.getName())
             item.setData(Qt.UserRole, None)
-            self.portfolio_window.userPortfolio.setTag(self.generateNewTagsDic())
+            if action2 is not None:
+                action2(self.generateNewTagsDic())
     
     def generateNewTagsDic(self):
         newTags = {}
@@ -182,6 +186,12 @@ class TagsWindow(QWidget):
     def eventFilter(self, source, event):
         if source == self.listTagsWidget and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Delete:
-                self.deleteSelectedItems()
+                if self.listTagsWidget.dragEnabled():
+                    print("Aqui")
+                    self.deleteSelectedItems(action1= self.portfolio_window.ativosWindow.deleteTagAllAtivoList, action2= self.portfolio_window.userPortfolio.setTag)
+                else:
+                    print("Ali")
+                    self.deleteSelectedItems()
+
                 return True
         return super().eventFilter(source, event)

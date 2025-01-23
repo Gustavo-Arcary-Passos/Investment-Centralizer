@@ -15,6 +15,7 @@ from app.QtCreateFunc.helper import createQToolButton
 from app.portfolioTab.overview import OverviewWindow
 from app.portfolioTab.ativos import AtivosWindow
 from app.portfolioTab.tag import TagsWindow
+from app.ativo import Ativo
 
 class PortFolioWindow(QWidget):
     def __init__(self):
@@ -119,14 +120,16 @@ class PortFolioWindow(QWidget):
 
         self.tagsWindow = TagsWindow(self)
         
+        tagList = QHBoxLayout()
+
         if not add and not edit:
             listAtivos_layout = self.ativosWindow.AtivosSetUp()
-            print("tagList")
-            tagList = self.tagsWindow.ListTags() 
+            tagList = self.tagsWindow.ListTags(dicTags = self.userPortfolio.getTags())
         elif add:
             listAtivos_layout = self.ativosWindow.AddAtivo()
         elif edit:
             listAtivos_layout = self.ativosWindow.ChangeAtivoData(ativoData)
+            tagList = self.tagsWindow.ListTags(dicTags = ativoData.getTags(), dragAble = False)
 
         ativo_layout.addLayout(listAtivos_layout, stretch=14)
         ativo_layout.addLayout(tagList, stretch=4)

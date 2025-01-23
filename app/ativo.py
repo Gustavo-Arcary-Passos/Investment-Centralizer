@@ -5,7 +5,7 @@ from app.yahoo_api import Info
 from app.data import Data
 
 class Ativo:
-    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None, sell = False, tags = []):
+    def __init__(self, ativo, custodia = None, categoria = None, codigo = None, quantidade = None, data = None, valor = None, sell = False, tags = {}):
         if isinstance(ativo, dict):
             self.nome = ativo["nome"]
             self.custodia = ativo["custodia"]
@@ -39,19 +39,21 @@ class Ativo:
             self.tags = tags
             if isinstance(data, str):
                 if not sell:
-                    self.data = self.data = Data(compra = { 
+                    self.data = Data(compra = { 
                         data : {
                             "quantidade": quantidade,
                             "valor": valor
                             }
                         })
                 else:
-                    self.data = self.data = Data(venda = { 
+                    self.data = Data(venda = { 
                         data : {
                             "quantidade": quantidade,
                             "valor": valor
                             }
                         })
+            elif isinstance(data, dict):
+                self.data = Data(compra = data["compra"], venda = data["venda"])
         if self.codigo is not None:
             self.info = Info(self.codigo)
             if self.info.getCurrency() == "USD":
@@ -136,7 +138,7 @@ class Ativo:
             "codigo": self.codigo,
             "quantidade": self.quantidade,
             "data": self.data.get(),
-            "tags": self.tags(),
+            "tags": self.tags,
         }
 
         return ativo
