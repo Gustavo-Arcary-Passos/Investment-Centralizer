@@ -4,9 +4,13 @@ from datetime import datetime, timedelta
 class Info:
     def __init__(self,codigo):
         self.ticker = yf.Ticker(codigo)
+        self.current_value = self.getValue()
 
     def getTicker(self):
         return self.ticker
+    
+    def getCurrentValue(self):
+        return self.current_value
 
     def getValue(self, data = None):
         if data is None:

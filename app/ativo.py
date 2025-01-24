@@ -96,8 +96,8 @@ class Ativo:
     def getValor(self):
         if self.codigo is not None:
             if self.conversao:
-                return self.info.getValue()*self.conversao.getValue()
-            return self.info.getValue()
+                return self.info.getCurrentValue()*self.conversao.getCurrentValue()
+            return self.info.getCurrentValue()
         return None
     
     def getPrecoAtual(self):
@@ -125,7 +125,7 @@ class Ativo:
 
     def getLucro(self):
         precoMedio = self.getPrecoMedio()
-        return (self.info.getValue() - precoMedio)*self.quantidade
+        return (self.info.getCurrentValue - precoMedio)*self.quantidade
     
     def getTags(self):
         return self.tags

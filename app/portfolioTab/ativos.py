@@ -211,6 +211,14 @@ class AtivosWindow(QWidget):
     def AddAtivo(self):
         main_layout = QVBoxLayout()
 
+        # Back_to_Principal_Layout
+        back_button_layout = QHBoxLayout()
+        back_button = QPushButton("<")
+        back_button.clicked.connect(self.portfolio_window.on_active)
+        back_button_layout.addWidget(back_button)
+        back_button_layout.addStretch()
+        main_layout.addLayout(back_button_layout)
+
         # Nome do ativo
         nome_ativo_label = QLabel("Nome:")
         self.add_nome_ativo_text = QLineEdit()
@@ -295,9 +303,7 @@ class AtivosWindow(QWidget):
             self.add_quantidade_compra_ativo_text.text(),
             self.add_valor_unitario_compra_ativo_text.text()
         ))
-        spacer = QWidget()
-        spacer.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Minimum)
-        confirm_button_layout.addWidget(spacer)
+        confirm_button_layout.addStretch()
         confirm_button_layout.addWidget(confirm_button)
         main_layout.addLayout(confirm_button_layout)
 
@@ -328,6 +334,13 @@ class AtivosWindow(QWidget):
     
     def ChangeAtivoData(self, ativo):
         ChangeAtivo = QVBoxLayout()
+
+        back_button_layout = QHBoxLayout()
+        back_button = QPushButton("<")
+        back_button.clicked.connect(self.portfolio_window.on_active)
+        back_button_layout.addWidget(back_button)
+        back_button_layout.addStretch()
+        ChangeAtivo.addLayout(back_button_layout)
 
         nome_ativo_label = QLabel("Nome:")
         self.nome_ativo_text = QLineEdit()
