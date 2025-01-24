@@ -15,6 +15,7 @@ from app.QtCreateFunc.helper import createQToolButton
 from app.portfolioTab.overview import OverviewWindow
 from app.portfolioTab.ativos import AtivosWindow
 from app.portfolioTab.tag import TagsWindow
+from app.portfolioTab.estrategias import EstrategiaWindow
 from app.ativo import Ativo
 
 class PortFolioWindow(QWidget):
@@ -139,9 +140,32 @@ class PortFolioWindow(QWidget):
         self.load_scene(ativo)
         self.current_scene = "active"
 
-    def on_estrategy(self):
-        content = QLabel("Cena de Estratégia")
-        self.load_scene(content)
+    def on_estrategy(self, add = False, show = False, estrategiaData = None):
+        print("on_estrategy")
+        if not hasattr(self, 'estrategiaWindow') or self.estrategiaWindow is None:
+            self.estrategiaWindow = EstrategiaWindow(self)
+
+        estrategia = QWidget() 
+
+        estrategia_layout = QHBoxLayout()
+
+        if not add and not show:
+            estrategia_layout_view = self.estrategiaWindow.EstrategiaSetUp()
+        elif add:
+            estrategia_layout_view = self.estrategiaWindow.AddEstrategia2Portfolio()
+        elif show:
+            estrategia_layout_view = self.estrategiaWindow.ShowEstrategia2Portfolio(estrategiaData)
+
+        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        spacer_layout = QHBoxLayout()
+        spacer_layout.addSpacerItem(spacer)
+
+        estrategia_layout.addLayout(estrategia_layout_view, stretch=14)
+        estrategia_layout.addLayout(spacer_layout, stretch=4)
+
+        estrategia.setLayout(estrategia_layout)
+
+        self.load_scene(estrategia)
 
     def on_metas(self):
         content = QLabel("Cena de Metas")

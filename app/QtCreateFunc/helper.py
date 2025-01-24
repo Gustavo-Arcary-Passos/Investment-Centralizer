@@ -8,6 +8,11 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QColor, QPainter, QPixmap, QFont, QIcon
 
+class NonInteractiveLabel(QLabel):
+    def __init__(self, text):
+        super().__init__(text)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+
 def create_custom_button(html_content, style=None):
     button = QPushButton()
     

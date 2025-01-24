@@ -8,13 +8,8 @@ from PyQt5.QtWidgets import (
     QButtonGroup, QColorDialog, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
 )
 from PyQt5.QtGui import QDoubleValidator, QColor, QDrag
-from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
+from app.QtCreateFunc.helper import NonInteractiveLabel
 from functools import partial
-
-class NonInteractiveLabel(QLabel):
-    def __init__(self, text):
-        super().__init__(text)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
 
 class DragTagList(QListWidget):
     def __init__(self, *args, **kwargs):

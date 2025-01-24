@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QButtonGroup, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
 )
 from PyQt5.QtGui import QDoubleValidator
-from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button
+from app.QtCreateFunc.helper import getValorMilharVirgula, create_custom_button, NonInteractiveLabel
 from functools import partial
 
 class AtivoDropTagList(QListWidget): 
@@ -69,11 +69,6 @@ def create_ListWidget():
     listWidget.setSpacing(2)
     return listWidget
 
-class NonInteractiveLabel(QLabel):
-    def __init__(self, text):
-        super().__init__(text)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
-
 class AtivosWindow(QWidget):
     def __init__(self, portfolio_window):
         super().__init__()
@@ -116,8 +111,6 @@ class AtivosWindow(QWidget):
         count = 0
         for ativo in listAllAtivo:
             list_item = QListWidgetItem()
-
-            list_item.setData(Qt.UserRole, ativo)
 
             value = ativo.getPrecoAtual()
             label_info = f"""

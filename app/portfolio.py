@@ -27,6 +27,9 @@ class Portfolio:
                 return ativoProcurado, index
         
         return None, None
+    
+    def getAllEstrategy(self):
+        return self.estrategia
 
     def getPatrimonio(self):
         patrimonioAcumulado = 0
