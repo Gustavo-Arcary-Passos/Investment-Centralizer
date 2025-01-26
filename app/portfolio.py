@@ -28,6 +28,9 @@ class Portfolio:
         
         return None, None
     
+    def getAllAtivos(self):
+        return self.ativos
+    
     def getAllEstrategy(self):
         return self.estrategia
 

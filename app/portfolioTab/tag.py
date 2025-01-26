@@ -127,6 +127,43 @@ class TagsWindow(QWidget):
                 """
             )
 
+    def getTagNameList(self):
+        print("getTagNameList")
+        tagList = []
+        for index in range(self.listTagsWidget.count()):
+            item = self.listTagsWidget.item(index)
+            tag = item.data(Qt.UserRole)
+            tagList.append(tag)
+
+        return tagList
+
+    def makeDragDisable(self,listTag):
+        print("makeDragDisable")
+        print(listTag)
+        for index in range(self.listTagsWidget.count()):
+            item = self.listTagsWidget.item(index)
+            tag = item.data(Qt.UserRole)
+            tagColor = tag.getColor()
+            if tag in listTag:
+                item.setFlags(item.flags() & ~Qt.ItemIsDragEnabled)
+                multiplier = 4
+                divisor = 5
+                disableColor = QColor(tagColor[0]*multiplier//divisor,tagColor[1]*multiplier//divisor,tagColor[2]*multiplier//divisor)
+                item.setBackground(disableColor)
+                widget = self.listTagsWidget.itemWidget(item)
+                if widget:
+                    widget.setStyleSheet(f"""
+                        QLabel {{
+                            text-align: center;
+                            background-color: rgb({disableColor.red()}, {disableColor.green()}, {disableColor.blue()});
+                            border-radius: 10px;
+                            padding: 5px;  
+                            color: gray;  /* Cor do texto desativado */
+                            font-size: 14px;  
+                            font-weight: bold;  
+                            font-family: Arial, sans-serif;  
+                        }}
+                    """)
 
     def addTagInList(self):
         list_item = QListWidgetItem()

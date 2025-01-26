@@ -1,6 +1,8 @@
 import os
 import ast
 import sys
+import types
+import copy
 import unidecode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from PyQt5.QtCore import Qt, QDate, QLocale, QSize, QEvent, QMimeData
@@ -10,6 +12,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIntValidator
 from app.QtCreateFunc.helper import NonInteractiveLabel
 from app.estrategia import Estrategia
+from app.ativo import Ativo
 from app.tag import Tag
 
 class NumericDelegate(QStyledItemDelegate):
@@ -20,12 +23,15 @@ class NumericDelegate(QStyledItemDelegate):
         return editor
 
 class DropTable(QTableWidget):
-    def __init__(self, rows, cols):
+    def __init__(self, rows, cols, portfolio = None):
         super().__init__(rows, cols)
-
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
-
+        self.portfolio_window = portfolio
+        if self.portfolio_window is not None:
+            print(portfolio.userPortfolio.getAllAtivos())
+            self.ativos = copy.deepcopy(portfolio.userPortfolio.getAllAtivos())
+            self.tags = []
         for row in range(rows):
             for col in range(cols):
                 item = QTableWidgetItem(f"Item {row + 1}, {col + 1}")
@@ -76,8 +82,13 @@ class DropTable(QTableWidget):
         item = QTableWidgetItem(tag.getName())
         item.setData(Qt.UserRole, tag)
         self.setItem(rows, 0, item)
-
+        self.specificManipulation(rows,data)
         event.accept()
+
+    def specificManipulation(self,row,tag):
+        print("specificManipulation")
+        #self.portfolio_window
+        pass
 
 class EstrategiaWindow(QWidget):
     def __init__(self, portfolio_window):
@@ -174,10 +185,10 @@ class EstrategiaWindow(QWidget):
         if estrategia:
             print(f"Ativo selecionado: {estrategia.getNome()}")
 
-    def createListWithLabel(self, column_label):
+    def createListWithLabel(self, column_label, portfolio = None):
         tableWithLabelLayout = QVBoxLayout()
 
-        tabela = DropTable(0,len(column_label))
+        tabela = DropTable(0,len(column_label), portfolio)
         tabela.setHorizontalHeaderLabels(column_label)
         tabela.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
         header = tabela.horizontalHeader()
@@ -208,11 +219,39 @@ class EstrategiaWindow(QWidget):
         main_layout.addLayout(nome_layout)
 
         estrategi_base_layout = QHBoxLayout()
-        tags_filtro_list_layout,self.tags_filtro_list = self.createListWithLabel(["Tags para filtro:","Quantidade de ativos"])
+        tags_filtro_list_layout,self.tags_filtro_list = self.createListWithLabel(["Tags para filtro:","Quantidade"],self.portfolio_window)
+        def ativosWithThisTag(self, row, tag):
+            print(f"ativosWithThisTag {tag}")
+            disableTagsList = self.portfolio_window.tagsWindow.getTagNameList()
+            print(disableTagsList)
+            quantidade = 0
+            self.tags.append(tag)
+            for ativo in self.ativos:
+                ativo = Ativo(ativo)
+                inFilters = True
+                if ativo.haveTag(tag):
+                    quantidade += 1
+                for tagItem in self.tags:
+                    if not ativo.haveTag(tagItem):
+                        inFilters = False
+                if inFilters:
+                    for i in range(len(disableTagsList) - 1, -1, -1):
+                        print(disableTagsList[i])
+                        if ativo.haveTag(disableTagsList[i].get()):
+                            del disableTagsList[i]
+            item = QTableWidgetItem(str(quantidade))
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            item.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 1, item)
+            self.portfolio_window.tagsWindow.makeDragDisable(disableTagsList)
+
+        self.tags_filtro_list.specificManipulation = types.MethodType(ativosWithThisTag, self.tags_filtro_list)
         self.tags_filtro_list.installEventFilter(self)
+
         tags_comparacao_list_layout,self.tags_comparacao_list = self.createListWithLabel(["Tags para comparar:","Partes","Percentual(%)"])
         self.tags_comparacao_list.setItemDelegateForColumn(1, NumericDelegate(self))
         self.tags_comparacao_list.installEventFilter(self)
+
         estrategi_base_layout.addLayout(tags_filtro_list_layout)
         estrategi_base_layout.addLayout(tags_comparacao_list_layout)
         main_layout.addLayout(estrategi_base_layout)

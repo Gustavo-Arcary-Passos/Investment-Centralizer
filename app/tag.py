@@ -19,3 +19,11 @@ class Tag():
     
     def setColot(self, newColor):
         self.color = newColor
+
+    def get(self):
+        tagDic = {
+            'name' : self.tag,
+            'color': self.color
+        }
+        return tagDic
+    

@@ -170,7 +170,11 @@ class Ativo:
                 return
 
     def addTag(self, dicTag):
+        if self.haveTag(dicTag):
+            return
+        self.tags[len(self.tags)] = dicTag
+
+    def haveTag(self, dicTag):
         for tag in self.tags:
             if self.tags[tag]["name"] == dicTag["name"]:
-                return
-        self.tags[len(self.tags)] = dicTag
+                return True
