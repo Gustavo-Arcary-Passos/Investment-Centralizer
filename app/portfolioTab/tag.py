@@ -39,7 +39,7 @@ class TagsWindow(QWidget):
         self.portfolio_window = portfolio_window
         self.listTagsWidget = None
 
-    def ListTags(self, dicTags = {}, dragAble = True):
+    def ListTags(self, dicTags = {}, dragAble = True, should = True):
         self.listTagsWidget = DragTagList()
         self.listTagsWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.listTagsWidget.setStyleSheet("""
@@ -77,39 +77,40 @@ class TagsWindow(QWidget):
             self.listTagsWidget.addItem(list_item)
             self.listTagsWidget.setItemWidget(list_item, tag_label)  
 
-
-        self.newTagName = QLineEdit()
-        self.newTagName.setPlaceholderText("Nova Tag")
-
-        horizontalLayout = QHBoxLayout()
-
-        color_label = QLabel("Color: ")
-        self.color_square = QPushButton()
-        self.color_square.setStyleSheet(
-            f"""
-            background-color: rgb({255}, {255}, {255});
-            border: 1px solid black;
-            padding: 3px;  /* Adiciona um padding para diminuir o quadrado interno */
-            """
-        )
-        self.save_color = [255,255,255]
-        self.color_square.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        self.color_square.setMaximumSize(12, 12)
-        self.color_square.setMinimumSize(12, 12)
-        self.color_square.clicked.connect(self.changeColor)
-
-        horizontalLayout.addWidget(color_label)
-        horizontalLayout.addWidget(self.color_square)
-
-        buttonAddTag = QPushButton("Add Tag")
-
-        buttonAddTag.clicked.connect(self.addTagInList)
-
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.listTagsWidget)
-        main_layout.addWidget(self.newTagName)
-        main_layout.addLayout(horizontalLayout)
-        main_layout.addWidget(buttonAddTag)
+
+        if should:
+            self.newTagName = QLineEdit()
+            self.newTagName.setPlaceholderText("Nova Tag")
+
+            horizontalLayout = QHBoxLayout()
+
+            color_label = QLabel("Color: ")
+            self.color_square = QPushButton()
+            self.color_square.setStyleSheet(
+                f"""
+                background-color: rgb({255}, {255}, {255});
+                border: 1px solid black;
+                padding: 3px;  /* Adiciona um padding para diminuir o quadrado interno */
+                """
+            )
+            self.save_color = [255,255,255]
+            self.color_square.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+            self.color_square.setMaximumSize(12, 12)
+            self.color_square.setMinimumSize(12, 12)
+            self.color_square.clicked.connect(self.changeColor)
+
+            horizontalLayout.addWidget(color_label)
+            horizontalLayout.addWidget(self.color_square)
+
+            buttonAddTag = QPushButton("Add Tag")
+
+            buttonAddTag.clicked.connect(self.addTagInList)
+
+            main_layout.addWidget(self.newTagName)
+            main_layout.addLayout(horizontalLayout)
+            main_layout.addWidget(buttonAddTag)
 
         return main_layout
     
@@ -161,7 +162,7 @@ class TagsWindow(QWidget):
                 action1(tag_data.getName())
             item.setData(Qt.UserRole, None)
             if action2 is not None:
-                action2(self.generateNewTagsDic())
+                action2(self.generateNewTagsDic(), tag_data.getName())
     
     def generateNewTagsDic(self):
         newTags = {}
@@ -182,10 +183,12 @@ class TagsWindow(QWidget):
         if source == self.listTagsWidget and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Delete:
                 if self.listTagsWidget.dragEnabled():
-                    print("Aqui")
-                    self.deleteSelectedItems(action1= self.portfolio_window.ativosWindow.deleteTagAllAtivoList, action2= self.portfolio_window.userPortfolio.setTag)
+                    updateAtivosWindow = None
+                    if self.portfolio_window.current_scene == "active" :
+                        print("Cena active")
+                        updateAtivosWindow = self.portfolio_window.ativosWindow.deleteTagAllAtivoList
+                    self.deleteSelectedItems(action1= updateAtivosWindow, action2= self.portfolio_window.userPortfolio.setTag)
                 else:
-                    print("Ali")
                     self.deleteSelectedItems()
 
                 return True

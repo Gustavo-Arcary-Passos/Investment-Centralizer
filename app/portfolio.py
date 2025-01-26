@@ -99,9 +99,15 @@ class Portfolio:
         self.tags[pos]["name"] = tagName
         self.tags[pos]["color"] = tagColor
 
-    def setTag(self, newTags):
+    def setTag(self, newTags, deleteTag = None):
         print(f"Set tags: {newTags}")
         self.tags = newTags
+        print("Verifica se precisa remover tag de algum ativo")
+        if deleteTag is not None:
+            for i in range(len(self.ativos)):
+                ativoProcurado = Ativo(self.ativos[i])
+                ativoProcurado.deleteTag(deleteTag)
+                self.ativos[i] = ativoProcurado.get() 
     
     def setAtivo(self,name,custody,ativo):
         for pos in range(0,len(self.ativos)):

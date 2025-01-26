@@ -111,15 +111,18 @@ class PortFolioWindow(QWidget):
         overview.setLayout(overview_layout)
 
         self.load_scene(overview)
+        self.current_scene = "overview"
 
     def on_active(self, add = False, edit = False, ativoData = None):
         print("on_active")
         if not hasattr(self, 'ativosWindow') or self.ativosWindow is None:
             self.ativosWindow = AtivosWindow(self)
+
+        if not hasattr(self, 'tagsWindow') or self.tagsWindow is None:
+            self.tagsWindow = TagsWindow(self)
+        
         ativo = QWidget() 
         ativo_layout = QHBoxLayout()
-
-        self.tagsWindow = TagsWindow(self)
         
         tagList = QHBoxLayout()
 
@@ -130,7 +133,7 @@ class PortFolioWindow(QWidget):
             listAtivos_layout = self.ativosWindow.AddAtivo()
         elif edit:
             listAtivos_layout = self.ativosWindow.ChangeAtivoData(ativoData)
-            tagList = self.tagsWindow.ListTags(dicTags = ativoData.getTags(), dragAble = False)
+            tagList = self.tagsWindow.ListTags(dicTags = ativoData.getTags(), dragAble = False, should = False)
 
         ativo_layout.addLayout(listAtivos_layout, stretch=14)
         ativo_layout.addLayout(tagList, stretch=4)
@@ -145,6 +148,9 @@ class PortFolioWindow(QWidget):
         if not hasattr(self, 'estrategiaWindow') or self.estrategiaWindow is None:
             self.estrategiaWindow = EstrategiaWindow(self)
 
+        if not hasattr(self, 'tagsWindow') or self.tagsWindow is None:
+            self.tagsWindow = TagsWindow(self)
+
         estrategia = QWidget() 
 
         estrategia_layout = QHBoxLayout()
@@ -156,21 +162,22 @@ class PortFolioWindow(QWidget):
         elif show:
             estrategia_layout_view = self.estrategiaWindow.ShowEstrategia2Portfolio(estrategiaData)
 
-        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding)
-        spacer_layout = QHBoxLayout()
-        spacer_layout.addSpacerItem(spacer)
+        tagList = self.tagsWindow.ListTags(dicTags = self.userPortfolio.getTags())
 
         estrategia_layout.addLayout(estrategia_layout_view, stretch=14)
-        estrategia_layout.addLayout(spacer_layout, stretch=4)
+        estrategia_layout.addLayout(tagList, stretch=4)
 
         estrategia.setLayout(estrategia_layout)
 
         self.load_scene(estrategia)
+        self.current_scene = "estrategy"
 
     def on_metas(self):
         content = QLabel("Cena de Metas")
         self.load_scene(content)
+        self.current_scene = "metas"
 
     def on_destaque(self):
         content = QLabel("Cena de Destaques")
         self.load_scene(content)
+        self.current_scene = "destaque"

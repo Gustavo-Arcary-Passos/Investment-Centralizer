@@ -3,13 +3,81 @@ import ast
 import sys
 import unidecode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from PyQt5.QtCore import Qt, QDate, QLocale, QSize
+from PyQt5.QtCore import Qt, QDate, QLocale, QSize, QEvent, QMimeData
 from PyQt5.QtWidgets import (
-    QButtonGroup, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem
+    QButtonGroup, QRadioButton, QCheckBox, QDateEdit, QMainWindow, QHBoxLayout, QVBoxLayout, QWidget, QToolBar, QToolButton, QSizePolicy, QLabel, QLineEdit, QGraphicsView, QGraphicsScene, QGraphicsTextItem, QGridLayout, QPushButton, QSpacerItem, QListWidget, QListWidgetItem, QTableWidget, QTableWidgetItem,  QHeaderView, QStyledItemDelegate
 )
-from PyQt5.QtGui import QDoubleValidator
+from PyQt5.QtGui import QIntValidator
 from app.QtCreateFunc.helper import NonInteractiveLabel
 from app.estrategia import Estrategia
+from app.tag import Tag
+
+class NumericDelegate(QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        editor = QLineEdit(parent)
+        validator = QIntValidator(0, 9999, editor)
+        editor.setValidator(validator)
+        return editor
+
+class DropTable(QTableWidget):
+    def __init__(self, rows, cols):
+        super().__init__(rows, cols)
+
+        self.setAcceptDrops(True)
+        self.setDropIndicatorShown(True)
+
+        for row in range(rows):
+            for col in range(cols):
+                item = QTableWidgetItem(f"Item {row + 1}, {col + 1}")
+                self.setItem(row, col, item)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat("application/tag-item-data"):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat("application/tag-item-data"):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        print("Drop em table")
+    
+        data = event.mimeData().data("application/tag-item-data").data().decode()
+        data = ast.literal_eval(data)
+        tag = Tag(tag=data)
+
+        rows = self.rowCount()
+        for row in range(rows):
+            item = self.item(row, 0)
+            if item and item.text() == tag.getName():
+                return
+        
+        self.insertRow(rows)
+        
+        tableTagName = NonInteractiveLabel(tag.getName())
+        tableTagColor = tag.getColor()
+        tableTagName.setStyleSheet(f"""
+            QLabel {{
+                text-align: left;
+                background-color: rgb({tableTagColor[0]}, {tableTagColor[1]}, {tableTagColor[2]});
+                border-radius: 10px;
+                padding: 5px;  
+                color: black;
+                font-size: 14px;  
+                font-weight: bold;  
+                font-family: Arial, sans-serif;  
+            }}
+        """)
+        self.setCellWidget(rows, 0, tableTagName)
+        item = QTableWidgetItem(tag.getName())
+        item.setData(Qt.UserRole, tag)
+        self.setItem(rows, 0, item)
+
+        event.accept()
 
 class EstrategiaWindow(QWidget):
     def __init__(self, portfolio_window):
@@ -106,6 +174,19 @@ class EstrategiaWindow(QWidget):
         if estrategia:
             print(f"Ativo selecionado: {estrategia.getNome()}")
 
+    def createListWithLabel(self, column_label):
+        tableWithLabelLayout = QVBoxLayout()
+
+        tabela = DropTable(0,len(column_label))
+        tabela.setHorizontalHeaderLabels(column_label)
+        tabela.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+        header = tabela.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Stretch)
+
+        tableWithLabelLayout.addWidget(tabela)
+
+        return tableWithLabelLayout, tabela
+
     def AddEstrategia2Portfolio(self):
         main_layout = QVBoxLayout()
 
@@ -126,11 +207,15 @@ class EstrategiaWindow(QWidget):
         nome_layout.addWidget(self.add_nome_estrategia_text)
         main_layout.addLayout(nome_layout)
 
-        tags_filtro_list = QListWidget()
-        tags_filtro_name = QLabel("Tags para filtro:")
-        tags_comparacao_list = QListWidget()
-        tags_comparacao_name = QLabel("Tags para comparar:")
-       
+        estrategi_base_layout = QHBoxLayout()
+        tags_filtro_list_layout,self.tags_filtro_list = self.createListWithLabel(["Tags para filtro:","Quantidade de ativos"])
+        self.tags_filtro_list.installEventFilter(self)
+        tags_comparacao_list_layout,self.tags_comparacao_list = self.createListWithLabel(["Tags para comparar:","Partes","Percentual(%)"])
+        self.tags_comparacao_list.setItemDelegateForColumn(1, NumericDelegate(self))
+        self.tags_comparacao_list.installEventFilter(self)
+        estrategi_base_layout.addLayout(tags_filtro_list_layout)
+        estrategi_base_layout.addLayout(tags_comparacao_list_layout)
+        main_layout.addLayout(estrategi_base_layout)
 
         confirm_button_layout = QHBoxLayout()
         
@@ -148,3 +233,13 @@ class EstrategiaWindow(QWidget):
         main_layout = QVBoxLayout()
 
         return main_layout
+    
+    def eventFilter(self, source, event):
+        if event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Delete:
+                selected_items = source.selectedItems()
+                if selected_items:
+                    row = selected_items[0].row()
+                    source.removeRow(row)
+                return True
+        return super().eventFilter(source, event)

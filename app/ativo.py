@@ -162,8 +162,10 @@ class Ativo:
         self.tags.append(tagNome)
 
     def deleteTag(self,tagNome):
+        print(f"deleteTag: {self.nome}")
         for tag in self.tags:
             if self.tags[tag]["name"] == tagNome:
+                print(f"delete: {self.tags[tag]['name']} -> {tagNome}")
                 del self.tags[tag]
                 return
 
