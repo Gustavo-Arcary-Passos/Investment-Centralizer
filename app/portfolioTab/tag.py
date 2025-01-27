@@ -127,13 +127,13 @@ class TagsWindow(QWidget):
                 """
             )
 
-    def getTagNameList(self):
-        print("getTagNameList")
+    def getTagList(self):
+        print("getTagList")
         tagList = []
         for index in range(self.listTagsWidget.count()):
             item = self.listTagsWidget.item(index)
             tag = item.data(Qt.UserRole)
-            tagList.append(tag)
+            tagList.append(tag.get())
 
         return tagList
 
@@ -143,8 +143,9 @@ class TagsWindow(QWidget):
         for index in range(self.listTagsWidget.count()):
             item = self.listTagsWidget.item(index)
             tag = item.data(Qt.UserRole)
+            tagdic = tag.get()
             tagColor = tag.getColor()
-            if tag in listTag:
+            if tagdic['name'] in listTag and (item.flags() & Qt.ItemIsDragEnabled):
                 item.setFlags(item.flags() & ~Qt.ItemIsDragEnabled)
                 multiplier = 4
                 divisor = 5
@@ -164,6 +165,26 @@ class TagsWindow(QWidget):
                             font-family: Arial, sans-serif;  
                         }}
                     """)
+            elif tagdic['name'] not in listTag:
+                if not (item.flags() & Qt.ItemIsDragEnabled):  # Verificar se o drag está desabilitado
+                    item.setFlags(item.flags() | Qt.ItemIsDragEnabled)  # Habilitar o drag
+                    Color = QColor(tagColor[0], tagColor[1], tagColor[2])
+                    item.setBackground(Color)
+
+                    widget = self.listTagsWidget.itemWidget(item)
+                    if widget:
+                        widget.setStyleSheet(f"""
+                            QLabel {{
+                                text-align: center;
+                                background-color: rgb({Color.red()}, {Color.green()}, {Color.blue()});
+                                border-radius: 10px;
+                                padding: 5px;  
+                                color: black;  /* Cor do texto habilitado */
+                                font-size: 14px;  
+                                font-weight: bold;  
+                                font-family: Arial, sans-serif;  
+                            }}
+                        """)
 
     def addTagInList(self):
         list_item = QListWidgetItem()

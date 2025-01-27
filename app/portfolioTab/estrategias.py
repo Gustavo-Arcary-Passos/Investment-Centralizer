@@ -15,6 +15,37 @@ from app.estrategia import Estrategia
 from app.ativo import Ativo
 from app.tag import Tag
 
+def getAtivosFiltro(listTagsFiltros,ativos):
+    print("getAtivosFiltro")
+    ativosFiltro = []
+    for ativo in ativos:
+        tags = ativo.getTags()
+        print(tags)
+        for tag in tags:
+            print(f"{tags[tag]} in {listTagsFiltros} : {tags[tag] in listTagsFiltros}")
+            if tags[tag] in listTagsFiltros:
+                ativosFiltro.append(ativo)
+                break
+    return ativosFiltro
+
+def getTagsShouldDisable(listTagsComparadas,listTagsFiltros,ativos):
+    print("getTagsShouldDisable")
+    print(f"Filtro : {listTagsFiltros}")
+    print(f"Ativos : {ativos}")
+    ativosTipado = []
+    for ativo in ativos:
+        ativosTipado.append(Ativo(ativo))
+    ativosFiltro = getAtivosFiltro(listTagsFiltros,ativosTipado)
+    ativosFiltroComparadas = getAtivosFiltro(listTagsComparadas,ativosFiltro)
+    print(f"Ativos filtrados : {ativosFiltro}")
+    disableTags = set()
+    for ativo in ativosFiltroComparadas:
+        tags = ativo.getTags()
+        for tag in tags:
+            disableTags.add(tags[tag]['name'])
+    print(f"Tags Disable : {disableTags}")
+    return disableTags
+
 class NumericDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         editor = QLineEdit(parent)
@@ -28,9 +59,10 @@ class DropTable(QTableWidget):
         self.setAcceptDrops(True)
         self.setDropIndicatorShown(True)
         self.portfolio_window = portfolio
+        self.listTags = []
         if self.portfolio_window is not None:
-            print(portfolio.userPortfolio.getAllAtivos())
-            self.ativos = copy.deepcopy(portfolio.userPortfolio.getAllAtivos())
+            #print(portfolio.userPortfolio.getAllAtivos())
+            self.ativos = self.portfolio_window.userPortfolio.getAllAtivos()
             self.tags = []
         for row in range(rows):
             for col in range(cols):
@@ -81,6 +113,7 @@ class DropTable(QTableWidget):
         self.setCellWidget(rows, 0, tableTagName)
         item = QTableWidgetItem(tag.getName())
         item.setData(Qt.UserRole, tag)
+        self.listTags.append(tag.get())
         self.setItem(rows, 0, item)
         self.specificManipulation(rows,data)
         event.accept()
@@ -222,34 +255,43 @@ class EstrategiaWindow(QWidget):
         tags_filtro_list_layout,self.tags_filtro_list = self.createListWithLabel(["Tags para filtro:","Quantidade"],self.portfolio_window)
         def ativosWithThisTag(self, row, tag):
             print(f"ativosWithThisTag {tag}")
-            disableTagsList = self.portfolio_window.tagsWindow.getTagNameList()
-            print(disableTagsList)
             quantidade = 0
             self.tags.append(tag)
             for ativo in self.ativos:
                 ativo = Ativo(ativo)
-                inFilters = True
                 if ativo.haveTag(tag):
                     quantidade += 1
-                for tagItem in self.tags:
-                    if not ativo.haveTag(tagItem):
-                        inFilters = False
-                if inFilters:
-                    for i in range(len(disableTagsList) - 1, -1, -1):
-                        print(disableTagsList[i])
-                        if ativo.haveTag(disableTagsList[i].get()):
-                            del disableTagsList[i]
+            
             item = QTableWidgetItem(str(quantidade))
             item.setFlags(item.flags() & ~Qt.ItemIsEditable)
             item.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 1, item)
-            self.portfolio_window.tagsWindow.makeDragDisable(disableTagsList)
+            
+            disableTagsSet = getTagsShouldDisable(self.portfolio_window.estrategiaWindow.tags_comparacao_list.listTags,self.portfolio_window.estrategiaWindow.tags_filtro_list.listTags,self.ativos)
+            disableTagsSet.add(tag['name'])
+            self.portfolio_window.tagsWindow.makeDragDisable(list(disableTagsSet))
 
         self.tags_filtro_list.specificManipulation = types.MethodType(ativosWithThisTag, self.tags_filtro_list)
         self.tags_filtro_list.installEventFilter(self)
 
-        tags_comparacao_list_layout,self.tags_comparacao_list = self.createListWithLabel(["Tags para comparar:","Partes","Percentual(%)"])
+        tags_comparacao_list_layout,self.tags_comparacao_list = self.createListWithLabel(["Tags para comparar:","Partes","Percentual(%)"],self.portfolio_window)
         self.tags_comparacao_list.setItemDelegateForColumn(1, NumericDelegate(self))
+
+        def generateOtherInfoWithTag(self, row, tag):
+            print(f"ativosWithThisTag {tag}")
+            self.tags.append(tag)
+            
+            # PRE - Processamento
+            # item = QTableWidgetItem(str(quantidade))
+            # item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            # item.setTextAlignment(Qt.AlignCenter)
+            # self.setItem(row, 1, item)
+            
+            disableTagsSet = getTagsShouldDisable(self.portfolio_window.estrategiaWindow.tags_comparacao_list.listTags,self.portfolio_window.estrategiaWindow.tags_filtro_list.listTags,self.ativos)
+            disableTagsSet.add(tag['name'])
+            self.portfolio_window.tagsWindow.makeDragDisable(list(disableTagsSet))
+
+        self.tags_comparacao_list.specificManipulation = types.MethodType(generateOtherInfoWithTag, self.tags_comparacao_list)
         self.tags_comparacao_list.installEventFilter(self)
 
         estrategi_base_layout.addLayout(tags_filtro_list_layout)
@@ -279,6 +321,19 @@ class EstrategiaWindow(QWidget):
                 selected_items = source.selectedItems()
                 if selected_items:
                     row = selected_items[0].row()
+                    tag_item = source.item(row, 0)  # Ajuste a coluna conforme o seu caso
+                    tag_da_linha_deletada = tag_item.data(Qt.UserRole)
+                    tagDic = tag_da_linha_deletada.get()
                     source.removeRow(row)
+                    for i in range(len(source.listTags)):
+                        print(f"{source.listTags[i]} == {tagDic}")
+                        if source.listTags[i] == tagDic:
+                            del source.listTags[i]
+                            break
+
+                    disableTagsSet = getTagsShouldDisable(self.tags_comparacao_list.listTags,self.tags_filtro_list.listTags,self.portfolio_window.userPortfolio.getAllAtivos())
+                    for tag in self.tags_filtro_list.listTags:
+                        disableTagsSet.add(tag['name'])
+                    self.portfolio_window.tagsWindow.makeDragDisable(list(disableTagsSet))
                 return True
         return super().eventFilter(source, event)
