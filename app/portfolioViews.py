@@ -158,7 +158,7 @@ class PortFolioWindow(QWidget):
         if not add and not show:
             estrategia_layout_view = self.estrategiaWindow.EstrategiaSetUp()
         elif add:
-            estrategia_layout_view = self.estrategiaWindow.AddEstrategia2Portfolio()
+            estrategia_layout_view = self.estrategiaWindow.AddEstrategia()
         elif show:
             estrategia_layout_view = self.estrategiaWindow.ShowEstrategia2Portfolio(estrategiaData)
 

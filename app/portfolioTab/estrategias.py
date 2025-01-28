@@ -15,6 +15,51 @@ from app.estrategia import Estrategia
 from app.ativo import Ativo
 from app.tag import Tag
 
+def getQuantity(table):
+    tags = {}
+    rows = table.rowCount()
+    for row in range(rows):
+        item = table.item(row, 0)
+        item2 = table.item(row, 1)
+        if item is not None:
+            tag = item.data(Qt.UserRole)
+            tags[tag.getName()] = item2.text()
+
+    return tags
+
+def getTags(table):
+    tags = {}
+    rows = table.rowCount()
+    for row in range(rows):
+        item = table.item(row, 0)
+        if item is not None:
+            tag = item.data(Qt.UserRole)
+            tags[len(tags)] = tag.get()
+
+    return tags
+
+def getPercentual4AllRow(table):
+    rows = table.rowCount()
+    total_sum = 0
+    for row in range(rows):
+        item = table.item(row, 1)
+        if item is not None:
+            total_sum += int(item.text())
+
+    for row in range(rows):
+        item = table.item(row, 1)
+        if item is not None:
+            value = int(item.text())
+            percentage = (value / total_sum) * 100 if total_sum != 0 else 0
+
+            item_col2 = table.item(row, 2)
+            if item_col2 is None: 
+                item_col2 = QTableWidgetItem()
+                item_col2.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row, 2, item_col2)
+
+            item_col2.setText(f"{percentage:.2f} %")
+
 def getAtivosFiltro(listTagsFiltros,ativos):
     print("getAtivosFiltro")
     ativosFiltro = []
@@ -30,20 +75,20 @@ def getAtivosFiltro(listTagsFiltros,ativos):
 
 def getTagsShouldDisable(listTagsComparadas,listTagsFiltros,ativos):
     print("getTagsShouldDisable")
-    print(f"Filtro : {listTagsFiltros}")
-    print(f"Ativos : {ativos}")
     ativosTipado = []
     for ativo in ativos:
         ativosTipado.append(Ativo(ativo))
     ativosFiltro = getAtivosFiltro(listTagsFiltros,ativosTipado)
     ativosFiltroComparadas = getAtivosFiltro(listTagsComparadas,ativosFiltro)
-    print(f"Ativos filtrados : {ativosFiltro}")
     disableTags = set()
     for ativo in ativosFiltroComparadas:
         tags = ativo.getTags()
         for tag in tags:
             disableTags.add(tags[tag]['name'])
-    print(f"Tags Disable : {disableTags}")
+    for tag in listTagsFiltros:
+        disableTags.add(tag['name'])
+    for tag in listTagsComparadas:
+        disableTags.add(tag['name'])
     return disableTags
 
 class NumericDelegate(QStyledItemDelegate):
@@ -61,7 +106,6 @@ class DropTable(QTableWidget):
         self.portfolio_window = portfolio
         self.listTags = []
         if self.portfolio_window is not None:
-            #print(portfolio.userPortfolio.getAllAtivos())
             self.ativos = self.portfolio_window.userPortfolio.getAllAtivos()
             self.tags = []
         for row in range(rows):
@@ -230,8 +274,20 @@ class EstrategiaWindow(QWidget):
         tableWithLabelLayout.addWidget(tabela)
 
         return tableWithLabelLayout, tabela
+    
+    def AddEstrategia2Portfolio(self, nome, tableTagsFiltros, tableTagsComparacao):
+        print(getTags(tableTagsFiltros))
+        print(getTags(tableTagsComparacao))
+        print(getQuantity(tableTagsComparacao))
+        estrategia = {
+            nome : {
+                "TagsFiltro" : {},
+                "TagsComparacao" : {},
+                "Quantidade" : {}
+            }
+        }
 
-    def AddEstrategia2Portfolio(self):
+    def AddEstrategia(self):
         main_layout = QVBoxLayout()
 
         # Back_to_Principal_Layout
@@ -278,20 +334,23 @@ class EstrategiaWindow(QWidget):
         self.tags_comparacao_list.setItemDelegateForColumn(1, NumericDelegate(self))
 
         def generateOtherInfoWithTag(self, row, tag):
-            print(f"ativosWithThisTag {tag}")
+            print(f"generateOtherInfoWithTag {tag}")
             self.tags.append(tag)
             
-            # PRE - Processamento
-            # item = QTableWidgetItem(str(quantidade))
-            # item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            # item.setTextAlignment(Qt.AlignCenter)
-            # self.setItem(row, 1, item)
+            index = self.model().index(row, 1)
+            self.model().setData(index, "1")
+
+            item = QTableWidgetItem(f"{0.0:.2f}")
+            item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            item.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 2, item)
             
             disableTagsSet = getTagsShouldDisable(self.portfolio_window.estrategiaWindow.tags_comparacao_list.listTags,self.portfolio_window.estrategiaWindow.tags_filtro_list.listTags,self.ativos)
             disableTagsSet.add(tag['name'])
             self.portfolio_window.tagsWindow.makeDragDisable(list(disableTagsSet))
 
         self.tags_comparacao_list.specificManipulation = types.MethodType(generateOtherInfoWithTag, self.tags_comparacao_list)
+        self.tags_comparacao_list.itemChanged.connect(lambda: getPercentual4AllRow(self.tags_comparacao_list))
         self.tags_comparacao_list.installEventFilter(self)
 
         estrategi_base_layout.addLayout(tags_filtro_list_layout)
@@ -301,8 +360,10 @@ class EstrategiaWindow(QWidget):
         confirm_button_layout = QHBoxLayout()
         
         confirm_button = QPushButton("Confirmar")
-        confirm_button.clicked.connect(lambda: self.AddAtivo2Portfolio(
-            self.add_nome_ativo_text.text(),
+        confirm_button.clicked.connect(lambda: self.AddEstrategia2Portfolio(
+            self.add_nome_estrategia_text.text(),
+            self.tags_filtro_list,
+            self.tags_comparacao_list
         ))
         confirm_button_layout.addStretch()
         confirm_button_layout.addWidget(confirm_button)
@@ -335,5 +396,7 @@ class EstrategiaWindow(QWidget):
                     for tag in self.tags_filtro_list.listTags:
                         disableTagsSet.add(tag['name'])
                     self.portfolio_window.tagsWindow.makeDragDisable(list(disableTagsSet))
+                if source is self.tags_comparacao_list:
+                    getPercentual4AllRow(self.tags_comparacao_list)
                 return True
         return super().eventFilter(source, event)
