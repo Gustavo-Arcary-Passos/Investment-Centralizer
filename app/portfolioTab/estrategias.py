@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIntValidator
 from app.QtCreateFunc.helper import NonInteractiveLabel
+from app.graphics import MatplotlibCanvas
 from app.estrategia import Estrategia
 from app.ativo import Ativo
 from app.tag import Tag
@@ -200,15 +201,18 @@ class EstrategiaWindow(QWidget):
                 color: white;
             }
         """)
+        self.listEstrategyWidget.setSpacing(3) 
 
         dicAllEstrategy = self.portfolio_window.userPortfolio.getAllEstrategy()
         for estrategy in dicAllEstrategy:
             list_item = QListWidgetItem()
-            estrategia = Estrategia(estrategy)
+            estrategia = Estrategia(estrategy, dicAllEstrategy[estrategy])
             list_item.setData(Qt.UserRole, estrategia)
 
             label_info = f"""
-                <b>{estrategia.getNome()}</b>
+                <div style="text-align: center; font-size: 24px">
+                    <b>{estrategia.getNome()}</b>
+                </div>
             """
             label = NonInteractiveLabel(label_info) 
             label.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
@@ -276,16 +280,13 @@ class EstrategiaWindow(QWidget):
         return tableWithLabelLayout, tabela
     
     def AddEstrategia2Portfolio(self, nome, tableTagsFiltros, tableTagsComparacao):
-        print(getTags(tableTagsFiltros))
-        print(getTags(tableTagsComparacao))
-        print(getQuantity(tableTagsComparacao))
         estrategia = {
-            nome : {
-                "TagsFiltro" : {},
-                "TagsComparacao" : {},
-                "Quantidade" : {}
-            }
+            "TagsFiltro" : getTags(tableTagsFiltros),
+            "TagsComparacao" : getTags(tableTagsComparacao),
+            "Quantidade" : getQuantity(tableTagsComparacao)
         }
+        self.portfolio_window.userPortfolio.addEstrategia(nome, estrategia)
+        self.portfolio_window.on_estrategy()
 
     def AddEstrategia(self):
         main_layout = QVBoxLayout()
@@ -372,8 +373,34 @@ class EstrategiaWindow(QWidget):
         return main_layout
     
     def ShowEstrategia2Portfolio(self, estrategiaData):
+        print("ShowEstrategia2Portfolio")
+        print(estrategiaData)
         main_layout = QVBoxLayout()
+        
+        canvas = MatplotlibCanvas(self, width=8, height=6, dpi=100)
+        canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        print("DICIONARIO")
+        dicInfo = self.portfolio_window.userPortfolio.getEstrategiaData(estrategiaData.getNome())
+        data = list(dicInfo.values())
+        self.labels = list(dicInfo.keys())
+        self.colors, _, self.percentage, _ = canvas.plot_concentric_donuts(
+            data=[data],
+            labels=self.labels,
+            radiusOut=1.5,
+            sizeOut=0.5
+        )
+        print("COR")
+        scene = QGraphicsScene()
+        scene.addWidget(canvas)
+        graphics_view = QGraphicsView(scene)
+        graphics_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        # rect = graphics_view.viewport().rect()
+        # centralizedText(scene, graphics_view, "Carteira:", rect.width() / 8, rect.height() / 16)
+        # patrimonio = "R$ " + getValorMilharVirgula(sum(data))
+        # centralizedText(scene, graphics_view, patrimonio, rect.width() / 8, rect.height() * 2 / 12)
 
+        main_layout.addWidget(graphics_view)
+        
         return main_layout
     
     def eventFilter(self, source, event):

@@ -4,6 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.ativo import Ativo
 from app.data import Data
 from app.tag import Tag
+from app.estrategia import Estrategia
 
 class Portfolio:
     def __init__(self, portfolio):
@@ -152,3 +153,38 @@ class Portfolio:
         del self.ativos[index]
         print("Update")
         self.addAtivoPortfolio(ativoInfo)
+
+    def addEstrategia(self,estrategiaName, estrategiaDic):
+        self.estrategia[estrategiaName] = estrategiaDic
+
+    def delEstrategia(self,estrategiaName):
+        del self.estrategia[estrategiaName]
+
+    def getMatchTagsAtivo(self, ativo, tags):
+        matchTags = []
+        for tag in tags:
+            if ativo.haveTag(tags[tag]):
+                matchTags.append(tags[tag]['name'])
+
+        return matchTags
+
+    def getEstrategiaData(self,estrategiaName):
+        print("getEstrategiaData")
+        estrategiaData = {}
+        print(estrategiaName)
+        print(self.estrategia[estrategiaName])
+        estrategia = Estrategia(estrategiaName,self.estrategia[estrategiaName])
+        filtros = estrategia.getTagsFiltro()
+        print("estrategia.getTagsFiltro()")
+        comparacao = estrategia.getTagsComparacao()
+        print("estrategia.getTagsComparacao()")
+        for ativo in self.ativos:
+            ativoProcurado = Ativo(ativo)
+            filtrosTags = self.getMatchTagsAtivo(ativoProcurado,filtros)
+            if len(filtrosTags) == len(filtros):
+                comparacaoTags = self.getMatchTagsAtivo(ativoProcurado,comparacao)
+                if len(comparacaoTags) > 1:
+                    continue
+                estrategiaData[comparacaoTags[0]] = estrategiaData.get(comparacaoTags[0],0) + ativoProcurado.getPrecoAtual()
+
+        return estrategiaData
