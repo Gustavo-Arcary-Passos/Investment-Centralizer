@@ -174,6 +174,11 @@ class Portfolio:
         print(estrategiaName)
         print(self.estrategia[estrategiaName])
         estrategia = Estrategia(estrategiaName,self.estrategia[estrategiaName])
+        quantidade = estrategia.getQuantidadePerTag()
+        valores = {chave: int(valor) for chave, valor in quantidade.items()}
+
+        total = sum(valores.values())
+        percentuais = {chave: (valor / total) * 100 for chave, valor in valores.items()} if total > 0 else {}
         filtros = estrategia.getTagsFiltro()
         print("estrategia.getTagsFiltro()")
         comparacao = estrategia.getTagsComparacao()
@@ -185,6 +190,9 @@ class Portfolio:
                 comparacaoTags = self.getMatchTagsAtivo(ativoProcurado,comparacao)
                 if len(comparacaoTags) > 1:
                     continue
-                estrategiaData[comparacaoTags[0]] = estrategiaData.get(comparacaoTags[0],0) + ativoProcurado.getPrecoAtual()
+                if comparacaoTags[0] not in estrategiaData:
+                    estrategiaData[comparacaoTags[0]] = [0]
+                estrategiaData[comparacaoTags[0]][0] += ativoProcurado.getPrecoAtual()
+                estrategiaData[comparacaoTags[0]].append(percentuais[comparacaoTags[0]])
 
         return estrategiaData

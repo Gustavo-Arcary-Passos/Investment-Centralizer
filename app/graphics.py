@@ -40,6 +40,8 @@ class MatplotlibCanvas(FigureCanvas):
         - colors: Cores para os anéis externos.
         - inner_colors: Cores para os anéis internos.
         """
+        print("plot_concentric_donuts")
+        print(data)
         if len(data[0]) != len(labels):
             raise ValueError("Os dados e os rótulos devem corresponder aos níveis interno e externo.")
         if len(data) == 2 and len(data[1]) != len(inner_labels):

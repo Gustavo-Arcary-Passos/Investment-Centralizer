@@ -153,19 +153,28 @@ class PortFolioWindow(QWidget):
 
         estrategia = QWidget() 
 
-        estrategia_layout = QHBoxLayout()
+        estrategia_layout = QVBoxLayout()
+
+        estrategia_data_layout = QHBoxLayout()
 
         if not add and not show:
             estrategia_layout_view = self.estrategiaWindow.EstrategiaSetUp()
+            tagList = self.tagsWindow.ListTags(dicTags = self.userPortfolio.getTags(),dragAble = False, should = False)
         elif add:
+            backButton = self.estrategiaWindow.back2Estrategy()
+            estrategia_layout.addLayout(backButton)
             estrategia_layout_view = self.estrategiaWindow.AddEstrategia()
+            tagList = self.tagsWindow.ListTags(dicTags = self.userPortfolio.getTags(), should = False)
         elif show:
+            backButton = self.estrategiaWindow.back2Estrategy()
+            estrategia_layout.addLayout(backButton)
             estrategia_layout_view = self.estrategiaWindow.ShowEstrategia2Portfolio(estrategiaData)
+            tagList = self.estrategiaWindow.ShowEstrategiaInfoConfig()
 
-        tagList = self.tagsWindow.ListTags(dicTags = self.userPortfolio.getTags())
+        estrategia_data_layout.addLayout(estrategia_layout_view, stretch=14)
+        estrategia_data_layout.addLayout(tagList, stretch=4)
 
-        estrategia_layout.addLayout(estrategia_layout_view, stretch=14)
-        estrategia_layout.addLayout(tagList, stretch=4)
+        estrategia_layout.addLayout(estrategia_data_layout)
 
         estrategia.setLayout(estrategia_layout)
 

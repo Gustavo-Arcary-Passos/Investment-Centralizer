@@ -15,6 +15,7 @@ from app.graphics import MatplotlibCanvas
 from app.estrategia import Estrategia
 from app.ativo import Ativo
 from app.tag import Tag
+from app.QtCreateFunc.helper import generateListDataInGrid
 
 def getQuantity(table):
     tags = {}
@@ -291,14 +292,6 @@ class EstrategiaWindow(QWidget):
     def AddEstrategia(self):
         main_layout = QVBoxLayout()
 
-        # Back_to_Principal_Layout
-        back_button_layout = QHBoxLayout()
-        back_button = QPushButton("<")
-        back_button.clicked.connect(self.portfolio_window.on_estrategy)
-        back_button_layout.addWidget(back_button)
-        back_button_layout.addStretch()
-        main_layout.addLayout(back_button_layout)
-
         # Nome do ativo
         nome_estrategia_label = QLabel("Nome da Estrategia:")
         self.add_nome_estrategia_text = QLineEdit()
@@ -372,6 +365,16 @@ class EstrategiaWindow(QWidget):
 
         return main_layout
     
+    def back2Estrategy(self):
+        main_layout = QVBoxLayout()
+        back_button_layout = QHBoxLayout()
+        back_button = QPushButton("<")
+        back_button.clicked.connect(self.portfolio_window.on_estrategy)
+        back_button_layout.addWidget(back_button)
+        back_button_layout.addStretch()
+        main_layout.addLayout(back_button_layout)
+        return main_layout
+    
     def ShowEstrategia2Portfolio(self, estrategiaData):
         print("ShowEstrategia2Portfolio")
         print(estrategiaData)
@@ -381,7 +384,8 @@ class EstrategiaWindow(QWidget):
         canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         print("DICIONARIO")
         dicInfo = self.portfolio_window.userPortfolio.getEstrategiaData(estrategiaData.getNome())
-        data = list(dicInfo.values())
+        print(dicInfo.values())
+        data = [v[0] for v in dicInfo.values()]
         self.labels = list(dicInfo.keys())
         self.colors, _, self.percentage, _ = canvas.plot_concentric_donuts(
             data=[data],
@@ -389,19 +393,30 @@ class EstrategiaWindow(QWidget):
             radiusOut=1.5,
             sizeOut=0.5
         )
-        print("COR")
+        self.expectedPercentage = [v[1] for v in dicInfo.values()]
+        
         scene = QGraphicsScene()
         scene.addWidget(canvas)
         graphics_view = QGraphicsView(scene)
         graphics_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        # rect = graphics_view.viewport().rect()
-        # centralizedText(scene, graphics_view, "Carteira:", rect.width() / 8, rect.height() / 16)
-        # patrimonio = "R$ " + getValorMilharVirgula(sum(data))
-        # centralizedText(scene, graphics_view, patrimonio, rect.width() / 8, rect.height() * 2 / 12)
 
         main_layout.addWidget(graphics_view)
         
         return main_layout
+    
+    def ShowEstrategiaInfoConfig(self):
+        info_layout = QVBoxLayout()
+        data_layout = QGridLayout()
+        print(self.percentage)
+        generateListDataInGrid(data_layout, 0, self.labels, self.colors, self.percentage, self.expectedPercentage)
+
+        info_layout.addLayout(data_layout)
+
+        emptyWidget = QWidget()
+        emptyWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        info_layout.addWidget(emptyWidget)
+
+        return info_layout
     
     def eventFilter(self, source, event):
         if event.type() == QEvent.KeyPress:

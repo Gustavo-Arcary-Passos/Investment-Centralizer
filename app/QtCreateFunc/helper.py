@@ -29,9 +29,10 @@ def create_custom_button(html_content, style=None):
 
     return button
 
-def generateListDataInGrid(grid,pos,labels, colors, percentage):
+def generateListDataInGrid(grid,pos,labels, colors, percentage, expected = None):
     grid.setHorizontalSpacing(5)  # Adiciona um pequeno espaço entre as linhas
 
+    i = 0
     for label, color, pct in zip(labels, colors, percentage):
         # Converte a cor de float (0.0 a 1.0) para inteiro (0 a 255)
         r, g, b, a = (int(c * 255) for c in color[:4])
@@ -54,7 +55,10 @@ def generateListDataInGrid(grid,pos,labels, colors, percentage):
         # Cria o rótulo
         label_widget = QLabel(label)
         label_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        label_percentage = QLabel(f"{pct:.2f}%")
+        if expected is None:
+            label_percentage = QLabel(f"{pct:.2f}%")
+        else:
+            label_percentage = QLabel(f"{pct:.2f}% / {expected[i]:.2f}%")
         label_percentage.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
 
         # Adiciona um espaçador para ocupar o espaço restante
@@ -65,7 +69,7 @@ def generateListDataInGrid(grid,pos,labels, colors, percentage):
         grid.addWidget(label_widget, pos, 2)  # Coluna 2: Rótulo
         grid.addWidget(label_percentage, pos, 3)  # Coluna 3: Percentual
         grid.addItem(spacer, pos, 4)  # Coluna 4: Espaçador
-
+        i += 1
         pos += 1
 
     return pos
