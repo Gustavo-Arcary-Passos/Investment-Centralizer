@@ -32,7 +32,7 @@ Este projeto é um gerenciador geral de ativos desenvolvido em Python, com o obj
 
 1. **Clonar o repositório:**
    ```bash
-   git clone https://github.com/seu-usuario/nome-do-repositorio.git
+   git clone https://github.com/Gustavo-Arcary-Passos/Investment-Centralizer.git
    ```
 
 2. **Instalar as dependências:**
