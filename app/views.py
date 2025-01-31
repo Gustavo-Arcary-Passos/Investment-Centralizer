@@ -41,8 +41,7 @@ class WindowManager(QMainWindow):
         self.central_widget.addWidget(self.portfolio_window)
 
         # Mostrar a janela de login inicialmente
-        #self.central_widget.setCurrentWidget(self.start_window)
-        self.central_widget.setCurrentWidget(self.portfolio_window)
+        self.central_widget.setCurrentWidget(self.start_window)
 
         self.showMaximized()
     

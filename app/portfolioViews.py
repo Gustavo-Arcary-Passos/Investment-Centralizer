@@ -77,6 +77,7 @@ class PortFolioWindow(QWidget):
     def getUserPortfolio(self, portfolioName):
         self.username = portfolioName
         self.userPortfolio = Portfolio(Investment.getUserInvestment(portfolioName))
+        return True
 
     def persistyData(self):
         print("persistyData")
